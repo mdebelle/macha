@@ -7,7 +7,7 @@ import (
     "github.com/zenazn/goji/web"
     "github.com/zenazn/goji/web/middleware"
 
-    "routing"
+    "github.com/mdebelle/macha/routing"
 )
  
 func main() {
