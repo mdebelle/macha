@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{{.Title}}</title>
+	<title>{{.Username}} Profile</title>
 </head>
 <body>
-	<h1>{{.Title}}</h1>
+	<h1>{{.Username}}</h1>
+	<ul>
+		<li>{{.Email}}</li>
+		<li>{{.Sexe}}</li>
+		<li>{{.Orientation}}</li>
+	</ul>
 
-	<p>[<a href="/edit/{{.Title}}">edit</a>]</p>
+	<p>{{.Bio}}</p>
 
-	<div>{{printf "%s" .Body}}</div>
 </body>
 </html>

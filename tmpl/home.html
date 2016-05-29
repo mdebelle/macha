@@ -5,8 +5,25 @@
 	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
 </head>
 <body>
-	<h1>{{.Title}}</h1>
+
+	<div class="container">
+		<div class="btn"><a href="/newUser">Créer un compte</a></div>
+		<div class="btn"><a href="/forgetPassword">J'ai oublié mon mot de passe</a></div>
+		<div class="separator"></div>
+		<div class="connection">
+			<form action="/connection" method="POST">
+				<div class="formField">
+					<input type="text" placeholder="NOM D'USAGE">
+				</div>
+				<div class="formField">
+					<input type="password" id="password" placeholder="MOT DE PASSE" name="password">
+				</div>
+				<div class="btn">
+					<input type="submit" value="Se connecter">
+				</div>
+			</form>
+		</div>
+	</div>
 
 </body>
 </html>
-

@@ -1,89 +1,76 @@
 package main
 
 import (
+	//	"database/sql"
 	"fmt"
-	"io/ioutil"
+	_ "github.com/go-sql-driver/mysql"
+	"html"
+	"log"
 	"net/http"
-	"regexp"
 )
 
-type Page struct {
-	Title      string
-	Stylesheet string
-	Body       []byte
-}
-
-var (
+const (
 	tmplDir = "tmpl/"
 	dataDir = "data/"
 )
 
-func (p *Page) save() error {
-	filename := dataDir + p.Title + ".txt"
-	return ioutil.WriteFile(filename, p.Body, 0600)
-}
-
-func loadPage(title, stylesheet string) (*Page, error) {
-	filename := dataDir + title + ".txt"
-	body, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return &Page{Title: title, Stylesheet: stylesheet, Body: body}, nil
-}
-
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Path) > 1 {
+
+	if len(r.URL.Path[len("/home/"):]) > 0 {
 		http.NotFound(w, r)
 		return
 	}
-	renderTemplate(w, "home", &Page{Title: "Homepage", Stylesheet: "home.css"})
-
+	renderTemplate(w, "home", &DefaultView{Title: "Homepage", Stylesheet: "home.css"})
 }
 
-// func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
-// 	p, err := loadPage(title)
-// 	if err != nil {
-// 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
-// 		return
-// 	}
-// 	renderTemplate(w, "view", p)
-// }
+func notfoundHandler(w http.ResponseWriter, r *http.Request) {
+	field := html.EscapeString(r.URL.Path[len("/notfound/"):])
+	renderTemplate(w, "notfound", &NotFoundView{Title: "Nothing Found", Stylesheet: "notfound.css", Field: field})
+}
 
-// func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
-// 	body := r.FormValue("body")
-// 	p := &Page{Title: title, Body: []byte(body)}
-// 	err := p.save()
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
-// }
+func profileHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.NotFound(w, r)
+		return
+	}
+	fmt.Println(r.Method)
+	username := html.EscapeString(r.URL.Path[len("/profile/"):])
+	user, err := getUserByUsername(username)
+	if err != nil {
+		http.Redirect(w, r, "/notfound/"+username, http.StatusFound)
+		return
+	}
+	renderTemplate(w, "profile", &user)
+}
 
-var validPath = regexp.MustCompile("^/(home|edit|save|view)/([a-zA-Z0-9]+)$")
-
-func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
-		fmt.Println(m)
-		if m == nil {
-			http.NotFound(w, r)
-			return
-		}
-		fn(w, r, m[2])
+func checkErr(err error) {
+	if err != nil {
+		fmt.Println("hello")
+		panic(err)
 	}
 }
 
 func main() {
 
-	fmt.Println("localhost:8080")
+	fmt.Println("localhost:4242")
 
-	http.HandleFunc("/", homeHandler)
-	// http.HandleFunc("/view/", makeHandler(viewHandler))
-	// http.HandleFunc("/edit/", makeHandler(editHandler))
-	// http.HandleFunc("/save/", makeHandler(saveHandler))
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
+	// static file
 
-	http.ListenAndServe(":8080", nil)
+	// Connection a la base de donnee
+	initdatabase()
+	fmt.Println("Database Created")
+	defer database.Close()
+
+	// roads
+	http.HandleFunc("/home/", homeHandler)
+	http.HandleFunc("/profile/", profileHandler)
+	http.HandleFunc("/notfound/", notfoundHandler)
+
+	stylesheet := http.FileServer(http.Dir("./css/"))
+
+	http.Handle("/home/css/", http.StripPrefix("/home/css/", stylesheet))
+	http.Handle("/profile/css/", http.StripPrefix("/profile/css/", stylesheet))
+	http.Handle("/notfound/css/", http.StripPrefix("/notfound/css/", stylesheet))
+
+	log.Fatal(http.ListenAndServe(":4242", nil))
 }
