@@ -20,12 +20,13 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	renderTemplate(w, "home", &DefaultView{Title: "Homepage", Stylesheet: "home.css"})
+	renderTemplate(w, "home", &RequiredData{Title: "Homepage", Stylesheet: "home.css"})
 }
 
 func notfoundHandler(w http.ResponseWriter, r *http.Request) {
 	field := html.EscapeString(r.URL.Path[len("/notfound/"):])
-	renderTemplate(w, "notfound", &NotFoundView{Title: "Nothing Found", Stylesheet: "notfound.css", Field: field})
+	data := RequiredData{Title: "Nothing Found", Stylesheet: "notfound.css"}
+	renderTemplate(w, "notfound", &NotFoundView{Data: data, Field: field})
 }
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,8 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/notfound/"+username, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "profile", &ProfileView{Title: user.Username, Stylesheet: "profile.css", ProfileUser: user})
+	data := RequiredData{Title: user.Username, Stylesheet: "profile.css"}
+	renderTemplate(w, "profile", &ProfileView{Data: data, ProfileUser: user})
 }
 
 func checkErr(err error) {

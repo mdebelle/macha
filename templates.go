@@ -5,20 +5,18 @@ import (
 	"net/http"
 )
 
-type DefaultView struct {
+type RequiredData struct {
 	Title      string
 	Stylesheet string
 }
 
 type NotFoundView struct {
-	Title      string
-	Stylesheet string
-	Field      string
+	Data  RequiredData
+	Field string
 }
 
 type ProfileView struct {
-	Title       string
-	Stylesheet  string
+	Data        RequiredData
 	ProfileUser User
 }
 
