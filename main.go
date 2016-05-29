@@ -40,7 +40,7 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/notfound/"+username, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "profile", &user)
+	renderTemplate(w, "profile", &ProfileView{Title: user.Username, Stylesheet: "profile.css", ProfileUser: user})
 }
 
 func checkErr(err error) {

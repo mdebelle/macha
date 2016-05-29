@@ -16,6 +16,12 @@ type NotFoundView struct {
 	Field      string
 }
 
+type ProfileView struct {
+	Title       string
+	Stylesheet  string
+	ProfileUser User
+}
+
 var templates = template.Must(template.ParseFiles(
 	tmplDir+"home.html",
 	tmplDir+"profile.html",

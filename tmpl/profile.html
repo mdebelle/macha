@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{{.Username}} Profile</title>
+	<title>{{.Title}} Profile</title>
+	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
 </head>
 <body>
-	<h1>{{.Username}}</h1>
+	<h1>{{.ProfileUser.Username}}</h1>
 	<ul>
-		<li>{{.Email}}</li>
-		<li>{{.Sexe}}</li>
-		<li>{{.Orientation}}</li>
+		<li>{{.ProfileUser.Email}}</li>
+		<li>{{.ProfileUser.Sexe}}</li>
+		<li>{{.ProfileUser.Orientation}}</li>
 	</ul>
 
-	<p>{{.Bio}}</p>
+	<p>{{.ProfileUser.Bio}}</p>
 
 </body>
 </html>
