@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{.Title}} Profile</title>
+	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
+</head>
+<body>
+
+	<div class="container">
+		<div class="separator"></div>
+		<div class="connection">
+			<form action="/createNewUser/" method="POST">
+				<div class="formField">
+					<input type="text" name="username" placeholder="username">
+				</div>
+				<div class="formField">
+					<input type="text" name="firstname" placeholder="firstname">
+				</div>
+				<div class="formField">
+					<input type="text" name="lastname" placeholder="lastname">
+				</div>
+				<div class="formField">
+					<input type="text" name="email" placeholder="email">
+				</div>
+				<div class="formField">
+					<input type="number" name="sexe" placeholder="sexe">
+				</div>
+				<div class="formField">
+					<input type="number" name="orientation" placeholder="orientation">
+				</div>
+				<textarea rows="15" cols="50" name="bio"></textarea>
+				<div class="btn">
+					<input type="submit" name="Creer mon compte">
+				</div>
+			</form>
+		</div>
+	</div>
+
+</body>
+</html>
