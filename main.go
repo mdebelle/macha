@@ -70,6 +70,13 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "profile", &ProfileView{Data: data, ProfileUser: user})
 }
 
+func sendemailHandler(w http.ResponseWriter, r *http.Request) {
+
+	sendmail("test", "vraiment ??")
+	http.Redirect(w, r, "/home/", http.StatusFound)
+
+}
+
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println("hello")
@@ -94,6 +101,7 @@ func main() {
 	http.HandleFunc("/newUser/", newUserHandler)
 	http.HandleFunc("/notfound/", notfoundHandler)
 	http.HandleFunc("/createNewUser/", createNewUserHandler)
+	http.HandleFunc("/send/", sendemailHandler)
 
 	// stylesheet := http.FileServer(http.Dir("./css/"))
 
