@@ -13,9 +13,11 @@ type User struct {
 	Firstname   string
 	Lastname    string
 	Email       string
+	Password    string
 	Sexe        int8
 	Orientation int8
-	Bio         string
+	Bio         sql.NullString
+	Popularite  int8
 	interests   []string
 	images      []Image
 }
@@ -37,6 +39,9 @@ var database *sql.DB
 
 func initdatabase() {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:3307)/machadb?charset=utf8")
+	//  DEFAULT CHARACTER SET utf8
+	//  DEFAULT COLLATE utf8_general_ci
+	//
 	checkErr(err)
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `image` (`id` int(11) NOT NULL AUTO_INCREMENT,`label` varchar(250) NOT NULL, `description` longtext NOT NULL, `userid` int(11) NOT NULL, PRIMARY KEY (`id`))")
 	checkErr(err)
@@ -44,19 +49,14 @@ func initdatabase() {
 	checkErr(err)
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `userinterest` (`id` int(11) NOT NULL AUTO_INCREMENT, `intersetid` varchar(40) NOT NULL, `userid` int(11) NOT NULL, PRIMARY KEY (`id`))")
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(40) NOT NULL, `firstname` varchar(40) NOT NULL, `lastname` varchar(40) NOT NULL, `email` varchar(255) NOT NULL, `password` varchar(250) NOT NULL, `sexe` tinyint(4) NOT NULL, `orientation` tinyint(4) NOT NULL, `bio` longtext NOT NULL, `popularite` int(11) NOT NULL, PRIMARY KEY (`id`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(40) NOT NULL, `firstname` varchar(40) NOT NULL, `lastname` varchar(40) NOT NULL, `email` varchar(255) NOT NULL, `password` varchar(250) NOT NULL, `sexe` tinyint(4) DEFAULT NULL, `orientation` tinyint(4) DEFAULT NULL, `bio` longtext DEFAULT NULL, `popularite` int(11) DEFAULT NULL, PRIMARY KEY (`id`))")
 	checkErr(err)
 
 	database = db
 }
 
 func addnewUser(user *User) {
-	smt, _ := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, sexe=?, orientation=?, bio=?")
-	res, _ := smt.Exec(user.Username, user.Firstname, user.Lastname, user.Email, user.Sexe, user.Orientation, user.Bio)
-	id, _ := res.LastInsertId()
-	if len(user.interests) > 0 {
-		addnewInterest(user.interests, id)
-	}
+
 }
 
 func addnewInterest(interests []string, userid int64) {

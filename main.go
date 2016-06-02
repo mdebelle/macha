@@ -1,80 +1,41 @@
 package main
 
 import (
-	//	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"html"
+	"goji.io"
+	"goji.io/pat"
+	// "html"
+	"io"
 	"log"
 	"net/http"
-	// "strconv"
+	"time"
 )
 
 const (
 	tmplDir = "tmpl/"
+	cssDir  = "./css/"
 	dataDir = "data/"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-
-	if len(r.URL.Path[len("/home/"):]) > 0 {
-		http.NotFound(w, r)
-		return
-	}
+func home(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "home", &RequiredData{Title: "Homepage", Stylesheet: "home.css"})
 }
 
-func notfoundHandler(w http.ResponseWriter, r *http.Request) {
-	field := html.EscapeString(r.URL.Path[len("/notfound/"):])
-	data := RequiredData{Title: "Nothing Found", Stylesheet: "notfound.css"}
-	renderTemplate(w, "notfound", &NotFoundView{Data: data, Field: field})
+func inscription(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "inscription", &RequiredData{Title: "Inscription", Stylesheet: "inscription.css"})
 }
 
-func createNewUserHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("creation")
-	fmt.Println(r)
-	if r.Method != "POST" {
-		http.NotFound(w, r)
-		return
+func staticfiles(w http.ResponseWriter, r *http.Request) {
+	static_file := r.URL.Path[len("/css/"):]
+	if len(static_file) != 0 {
+		f, err := http.Dir(cssDir).Open(static_file)
+		if err == nil {
+			content := io.ReadSeeker(f)
+			http.ServeContent(w, r, static_file, time.Now(), content)
+			return
+		}
 	}
-	var user = User{Username: r.FormValue("username"),
-		Firstname: r.FormValue("firstname"),
-		Lastname:  r.FormValue("lastname"),
-		Email:     r.FormValue("email"),
-		// Sexe:        strconv.Atoi(r.FormValue("sexe")),
-		// Orientation: strconv.Atoi(r.FormValue("orientation")),
-		Bio: r.FormValue("bio")}
-
-	addnewUser(&user)
-
-	http.Redirect(w, r, "/home/", http.StatusFound)
-}
-
-func newUserHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "newUser", &RequiredData{Title: "NewUser", Stylesheet: "home.css"})
-}
-
-func profileHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.NotFound(w, r)
-		return
-	}
-	fmt.Println(r.Method)
-	username := html.EscapeString(r.URL.Path[len("/profile/"):])
-	user, err := getUserByUsername(username)
-	if err != nil {
-		http.Redirect(w, r, "/notfound/"+username, http.StatusFound)
-		return
-	}
-	data := RequiredData{Title: user.Username, Stylesheet: "profile.css"}
-	renderTemplate(w, "profile", &ProfileView{Data: data, ProfileUser: user})
-}
-
-func sendemailHandler(w http.ResponseWriter, r *http.Request) {
-
-	sendmail("test", "vraiment ??")
-	http.Redirect(w, r, "/home/", http.StatusFound)
-
 }
 
 func checkErr(err error) {
@@ -88,26 +49,54 @@ func main() {
 
 	fmt.Println("localhost:4242")
 
-	// static file
-
 	// Connection a la base de donnee
 	initdatabase()
 	fmt.Println("Database Created")
 	defer database.Close()
 
-	// roads
-	http.HandleFunc("/home/", homeHandler)
-	http.HandleFunc("/profile/", profileHandler)
-	http.HandleFunc("/newUser/", newUserHandler)
-	http.HandleFunc("/notfound/", notfoundHandler)
-	http.HandleFunc("/createNewUser/", createNewUserHandler)
-	http.HandleFunc("/send/", sendemailHandler)
+	mux := goji.NewMux()
 
-	// stylesheet := http.FileServer(http.Dir("./css/"))
+	mux.HandleFunc(pat.Get("/"), home)
 
-	// http.Handle("/home/css/", http.StripPrefix("/home/css/", stylesheet))
-	// http.Handle("/profile/css/", http.StripPrefix("/profile/css/", stylesheet))
-	// http.Handle("/notfound/css/", http.StripPrefix("/notfound/css/", stylesheet))
+	mux.HandleFunc(pat.Get("/inscription"), inscription)
 
-	log.Fatal(http.ListenAndServe(":4242", nil))
+	mux.HandleFunc(pat.Post("/users"), postUsers)
+	mux.HandleFunc(pat.Get("/users"), getUsers)
+
+	// mux.HandleFuncC(pat.Put("/users/:id"), putUsers)
+	// mux.HandleFuncC(pat.Delete("/users/:id"), deleteUsers)
+
+	// mux.HandleFuncC(pat.Put("/users/:id/sexe/:genre"), putUsersSexe)
+	// mux.HandleFuncC(pat.Put("/users/:id/orientation/:orientation"), putUsersOrientation)
+	// mux.HandleFuncC(pat.Put("/users/:id/bio"), putUsersBio)
+	// mux.HandleFuncC(pat.Put("/users/:id/firstname"), putUsersFirstname)
+	// mux.HandleFuncC(pat.Put("/users/:id/lastname"), putUsersLastname)
+	// mux.HandleFuncC(pat.Put("/users/:id/mail"), putUsersMail)
+	// mux.HandleFuncC(pat.Put("/users/:id/password"), putUsersPassword)
+
+	// // User's interests Road
+	// mux.HandleFuncC(pat.Post("/users/:id/interests/:interestid"), postUsersInterests)
+	// mux.HandleFuncC(pat.Get("/users/:id/interests"), getUsersInterests)
+	// mux.HandleFuncC(pat.Delete("/users/:id/interests/:interestid"), deleteUsersInterests)
+
+	// // User's images Road
+	// mux.HandleFuncC(pat.Post("/users/:id/images/"), postUsersImages)
+	// mux.HandleFuncC(pat.Put("/users/:id/images/:idimage"), putUsersImageProfile)
+	// mux.HandleFuncC(pat.Delete("/users/:id/images/:idimage"), deleteUsersImages)
+
+	// // Interests
+	// mux.HandleFunc(pat.Post("/interests/"), postInterests)
+	// mux.HandleFunc(pat.Get("/interests/"), getInterests)
+	// mux.HandleFuncC(pat.Delete("/interests/:id"), deleteInterests)
+
+	// // Search
+	// mux.HandleFuncC(pat.Get("search/interests/:id/Users"), getInterestsUsers)
+	// mux.HandleFuncC(pat.Get("search/sex/:id/Users"), getSexUsers)
+	// mux.HandleFuncC(pat.Get("search/orientation/:id/Users"), getOrientationUsers)
+	// mux.HandleFuncC(pat.Get("search/sexe/:sexeid/orientation/:orientationid/Users"), getSexeOrientationUsers)
+
+	mux.HandleFunc(pat.Get("/css/*"), staticfiles)
+
+	log.Fatal(http.ListenAndServe(":4242", mux))
+
 }

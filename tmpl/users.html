@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{.Title}} Profile</title>
+	<link rel="stylesheet" media="all" href="assets/css/{{.Stylesheet}}">
+</head>
+<body>
+
+	<ul>
+		{{ range $key, $user := .users }}
+		   <li>{{ $user.firstname }} {{ $user.Lastname }}</li>
+		{{ end }}
+	</ul>
+
+</body>
+</html>
