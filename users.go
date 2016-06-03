@@ -1,22 +1,43 @@
 package main
 
 import (
+	"crypto/sha1"
+	"database/sql"
+	"errors"
 	"fmt"
-	// "database/sql"
-	// "goji.io/pat"
-	// "golang.org/x/net/context"
 	"net/http"
 )
+
+func checkLoginUser(username, password string) (User, error) {
+
+	var user User
+	var spassword string
+
+	err := database.QueryRow("SELECT id, Firstname, Lastname password FROM users WHERE username=?", username).Scan(&user.Id, &user.Firstname, &user.Lastname, &spassword)
+	switch {
+	case err == sql.ErrNoRows:
+		return user, errors.New("empty")
+	case err != nil:
+		return user, err
+	}
+	if password != spassword {
+		return user, errors.New("wrong Password")
+	}
+	return user, nil
+}
 
 func postUsers(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("hello")
+
+	p := sha1.Sum([]byte(r.FormValue("password")))
+
 	var user = User{
 		Username:  r.FormValue("username"),
 		Firstname: r.FormValue("firstname"),
 		Lastname:  r.FormValue("lastname"),
 		Email:     r.FormValue("email"),
-		Password:  r.FormValue("password")}
+		Password:  string(p[:])}
 
 	fmt.Println(user)
 	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")

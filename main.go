@@ -1,35 +1,79 @@
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
-	// "html"
 	"io"
 	"log"
 	"net/http"
 	"time"
 )
 
-const (
-	tmplDir = "tmpl/"
-	cssDir  = "./css/"
-	dataDir = "data/"
-)
+type MinimumInfo struct {
+	Title      string
+	Stylesheet string
+	Firstname  string
+	Lastname   string
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "home", &RequiredData{Title: "Homepage", Stylesheet: "home.css"})
+}
+
+func connectedUser(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	var v MinimumInfo
+	if session.Values["connected"] == true {
+		v.Stylesheet = "home.css"
+		v.Firstname = session.Values["Firstname"].(string)
+		v.Lastname = session.Values["Lastname"].(string)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	renderTemplate(w, "homeUser", &v)
 }
 
 func inscription(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "inscription", &RequiredData{Title: "Inscription", Stylesheet: "inscription.css"})
 }
 
+func login(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] == true {
+		http.Redirect(w, r, "/me", http.StatusFound)
+		return
+	}
+	username := r.FormValue("username")
+	password := sha1.Sum([]byte(r.FormValue("password")))
+
+	user, err := checkLoginUser(username, string(password[:]))
+	checkErr(err)
+	session.Values["connected"] = true
+	session.Values["id"] = user.Id
+	session.Values["Firstname"] = user.Firstname
+	session.Values["Lastname"] = user.Lastname
+	session.Save(r, w)
+	http.Redirect(w, r, "/me", http.StatusFound)
+
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	session.Values["connected"] = false
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func staticfiles(w http.ResponseWriter, r *http.Request) {
 	static_file := r.URL.Path[len("/css/"):]
 	if len(static_file) != 0 {
-		f, err := http.Dir(cssDir).Open(static_file)
+		f, err := http.Dir(CSS_DIRECTORY).Open(static_file)
 		if err == nil {
 			content := io.ReadSeeker(f)
 			http.ServeContent(w, r, static_file, time.Now(), content)
@@ -40,7 +84,6 @@ func staticfiles(w http.ResponseWriter, r *http.Request) {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Println("hello")
 		panic(err)
 	}
 }
@@ -59,6 +102,9 @@ func main() {
 	mux.HandleFunc(pat.Get("/"), home)
 
 	mux.HandleFunc(pat.Get("/inscription"), inscription)
+	mux.HandleFunc(pat.Get("/login"), login)
+	mux.HandleFunc(pat.Get("/logout"), logout)
+	mux.HandleFunc(pat.Get("/me"), connectedUser)
 
 	mux.HandleFunc(pat.Post("/users"), postUsers)
 	mux.HandleFunc(pat.Get("/users"), getUsers)

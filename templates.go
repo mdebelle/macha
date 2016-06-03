@@ -21,9 +21,9 @@ type ProfileView struct {
 }
 
 var templates = template.Must(template.ParseFiles(
-	tmplDir+"home.html",
-	tmplDir+"inscription.html",
-	tmplDir+"users.html"))
+	TEMPLATE_DIRECTORY+"home.html",
+	TEMPLATE_DIRECTORY+"inscription.html",
+	TEMPLATE_DIRECTORY+"users.html"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, v interface{}) {
 	err := templates.ExecuteTemplate(w, tmpl+".html", v)
