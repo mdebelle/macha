@@ -1,26 +1,50 @@
 package main
 
 import (
-	"crypto/sha1"
 	"database/sql"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
-func checkLoginUser(username, password string) (User, error) {
+func testEq(a, b []byte) bool {
+
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func checkLoginUser(username string, password []byte) (User, error) {
 
 	var user User
-	var spassword string
+	var spassword []byte
 
-	err := database.QueryRow("SELECT id, Firstname, Lastname password FROM users WHERE username=?", username).Scan(&user.Id, &user.Firstname, &user.Lastname, &spassword)
+	fmt.Println(username)
+	err := database.QueryRow("SELECT id, Firstname, Lastname, password FROM user WHERE username=?", username).Scan(&user.Id, &user.Firstname, &user.Lastname, &spassword)
 	switch {
 	case err == sql.ErrNoRows:
 		return user, errors.New("empty")
 	case err != nil:
 		return user, err
 	}
-	if password != spassword {
+	if testEq(password, spassword) {
 		return user, errors.New("wrong Password")
 	}
 	return user, nil
@@ -30,14 +54,15 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("hello")
 
-	p := sha1.Sum([]byte(r.FormValue("password")))
+	p, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
+	checkErr(err)
 
 	var user = User{
 		Username:  r.FormValue("username"),
 		Firstname: r.FormValue("firstname"),
 		Lastname:  r.FormValue("lastname"),
 		Email:     r.FormValue("email"),
-		Password:  string(p[:])}
+		Password:  p}
 
 	fmt.Println(user)
 	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"crypto/sha1"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
 	"net/http"
@@ -43,15 +43,18 @@ func inscription(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("je me log")
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] == true {
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
 	}
 	username := r.FormValue("username")
-	password := sha1.Sum([]byte(r.FormValue("password")))
+	password, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
+	checkErr(err)
 
-	user, err := checkLoginUser(username, string(password[:]))
+	user, err := checkLoginUser(username, password)
 	checkErr(err)
 	session.Values["connected"] = true
 	session.Values["id"] = user.Id
@@ -102,7 +105,7 @@ func main() {
 	mux.HandleFunc(pat.Get("/"), home)
 
 	mux.HandleFunc(pat.Get("/inscription"), inscription)
-	mux.HandleFunc(pat.Get("/login"), login)
+	mux.HandleFunc(pat.Post("/login"), login)
 	mux.HandleFunc(pat.Get("/logout"), logout)
 	mux.HandleFunc(pat.Get("/me"), connectedUser)
 
