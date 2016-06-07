@@ -8,7 +8,29 @@
 	
 	var apiUrl = '/users/me/';
 
+	console.log("yo");
 	$(document).ready(function(){
+		
+		//Recuperer les elements
+		$.ajax({
+			url:	apiUrl + 'interests/',
+			type:	'GET',
+			sucess: function(data) {
+				console.log("ici");
+				if (data) {
+					$.each(data, function(index, value){
+						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ value.Id+'">x</a>' + value.Label + '</li>');
+					})
+				} else {
+					alert(data)
+				}
+			},
+			error: function(xhr,status,error) {
+				console.log("what");
+				console.log(error);
+			}
+		});
+
 
 		//Ajouter un Element d'interet a la liste
 		$('#addinterest').on('submit', function(e){
@@ -17,11 +39,13 @@
 			$.ajax({
 				url:			apiUrl + 'interests/',
 				type:			'POST',
+				data:			JSON.stringify({Label:content}),
 				contentType:	'application/json',
 				dataType:		'json',
-				sucess: function(data) {
+				sucess:			function(data) {
+					console.log("la");
 					if (data.Status) {
-						$('#intersts').append('<li class="interest"><a class="delete" data-id="'+ data.Status+'">x</a>' + content + '</li>');
+						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ data.Status+'">x</a>' + content + '</li>');
 						$('#addinterest input[type="text"]').val('');
 					} else {
 						alert(data);
@@ -55,12 +79,17 @@
 <body>
 
 	<p>Hello {{.Firstname}} {{.Lastname}}</p>
+	<ul id="interests">
+		
+	</ul>
+
 	<a href="/logout">Logout</a>
 
 	<form id="addinterest" action="#" method="POST">
-		<input type="text" name="content"/>
+		<input type="text" name="label"/>
 		<input type="submit" value="Add"/>
 	</form>
+
 
 
 </body>

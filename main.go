@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
@@ -17,6 +18,10 @@ type MinimumInfo struct {
 	Stylesheet string
 	Firstname  string
 	Lastname   string
+}
+
+type ResponseStatus struct {
+	Status string
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +89,15 @@ func staticfiles(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func writeJson(w http.ResponseWriter, v interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(w).Encode(v)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
@@ -124,7 +138,7 @@ func main() {
 
 	// User's interests Road
 	mux.HandleFunc(pat.Post("/users/me/interests/"), postUsersInterests)
-	// mux.HandleFuncC(pat.Get("/users/:id/interests"), getUsersInterests)
+	mux.HandleFunc(pat.Get("/users/me/interests/"), getUsersInterests)
 	mux.HandleFuncC(pat.Delete("/users/me/interests/:interestid"), deleteUsersInterests)
 
 	// // User's images Road

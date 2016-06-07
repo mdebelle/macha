@@ -2,12 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 func testEq(a, b []byte) bool {
@@ -164,6 +168,8 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 
 func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 
+	var interest Interest
+
 	fmt.Println("ajouter les interets des utiliateurs")
 
 	session, _ := store.Get(r, "session")
@@ -171,22 +177,48 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &interest)
+	checkErr(err)
+	fmt.Println(interest)
 
-	interest := r.FormValue("content")
-	interestid := getInterestId(interest)
+	interest.Id = getInterestId(interest.Label, session.Values["id"].(int))
 
-	if interestid != -1 {
-		smt, err := database.Prepare("INSERT userinterest SET interestid=?, userid=?")
-		checkErr(err)
-		_, err = smt.Exec(interestid, session.Values["id"])
-		checkErr(err)
-	}
+	fmt.Println(interest)
+	writeJson(w, ResponseStatus{Status: strconv.Itoa(int(interest.Id))})
 }
 
-// func getUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
+func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 
-// }
+	fmt.Println("recuperer les interets de l'utiliateurs")
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	userid := session.Values["id"].(int)
+	fmt.Println(userid)
+	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid  WHERE userinterest.userid=?")
+	checkErr(err)
+	rows, err := smt.Query(userid)
+	checkErr(err)
+
+	var interests []Interest
+	var i int
+	for rows.Next() {
+		interests = append(interests, Interest{})
+		err := rows.Scan(&interests[i].Id, &interests[i].Label)
+		checkErr(err)
+		i++
+	}
+	err = rows.Err()
+	checkErr(err)
+	writeJson(w, interests)
+}
 
 func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
