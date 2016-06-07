@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	//	_ "github.com/go-sql-driver/mysql"
 	"errors"
 	"fmt"
 )
@@ -14,10 +13,10 @@ type User struct {
 	Lastname    string
 	Email       string
 	Password    []byte
-	Sexe        int8
-	Orientation int8
+	Sexe        sql.NullInt64
+	Orientation sql.NullInt64
 	Bio         sql.NullString
-	Popularite  int8
+	Popularite  sql.NullInt64
 	interests   []string
 	images      []Image
 }

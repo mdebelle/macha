@@ -44,7 +44,6 @@ func inscription(w http.ResponseWriter, r *http.Request) {
 
 func login(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("je me log")
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] == true {
 		http.Redirect(w, r, "/me", http.StatusFound)
@@ -115,18 +114,18 @@ func main() {
 	// mux.HandleFuncC(pat.Put("/users/:id"), putUsers)
 	// mux.HandleFuncC(pat.Delete("/users/:id"), deleteUsers)
 
-	// mux.HandleFuncC(pat.Put("/users/:id/sexe/:genre"), putUsersSexe)
-	// mux.HandleFuncC(pat.Put("/users/:id/orientation/:orientation"), putUsersOrientation)
-	// mux.HandleFuncC(pat.Put("/users/:id/bio"), putUsersBio)
-	// mux.HandleFuncC(pat.Put("/users/:id/firstname"), putUsersFirstname)
-	// mux.HandleFuncC(pat.Put("/users/:id/lastname"), putUsersLastname)
-	// mux.HandleFuncC(pat.Put("/users/:id/mail"), putUsersMail)
-	// mux.HandleFuncC(pat.Put("/users/:id/password"), putUsersPassword)
+	// mux.HandleFuncC(pat.Put("/users/me/sexe/"), putUsersSexe)
+	// mux.HandleFuncC(pat.Put("/users/me/orientation/"), putUsersOrientation)
+	// mux.HandleFuncC(pat.Put("/users/me/bio"), putUsersBio)
+	// mux.HandleFuncC(pat.Put("/users/me/firstname"), putUsersFirstname)
+	// mux.HandleFuncC(pat.Put("/users/me/lastname"), putUsersLastname)
+	// mux.HandleFuncC(pat.Put("/users/me/mail"), putUsersMail)
+	// mux.HandleFuncC(pat.Put("/users/me/password"), putUsersPassword)
 
-	// // User's interests Road
-	// mux.HandleFuncC(pat.Post("/users/:id/interests/:interestid"), postUsersInterests)
+	// User's interests Road
+	mux.HandleFunc(pat.Post("/users/me/interests/"), postUsersInterests)
 	// mux.HandleFuncC(pat.Get("/users/:id/interests"), getUsersInterests)
-	// mux.HandleFuncC(pat.Delete("/users/:id/interests/:interestid"), deleteUsersInterests)
+	mux.HandleFuncC(pat.Delete("/users/me/interests/:interestid"), deleteUsersInterests)
 
 	// // User's images Road
 	// mux.HandleFuncC(pat.Post("/users/:id/images/"), postUsersImages)
@@ -134,7 +133,7 @@ func main() {
 	// mux.HandleFuncC(pat.Delete("/users/:id/images/:idimage"), deleteUsersImages)
 
 	// // Interests
-	// mux.HandleFunc(pat.Post("/interests/"), postInterests)
+	mux.HandleFunc(pat.Post("/interests/"), postInterests)
 	// mux.HandleFunc(pat.Get("/interests/"), getInterests)
 	// mux.HandleFuncC(pat.Delete("/interests/:id"), deleteInterests)
 

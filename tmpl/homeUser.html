@@ -3,11 +3,64 @@
 <head>
 	<title>{{.Title}} Profile</title>
 	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
+	<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script type="text/javascript">
+	
+	var apiUrl = '/users/me/';
+
+	$(document).ready(function(){
+
+		//Ajouter un Element d'interet a la liste
+		$('#addinterest').on('submit', function(e){
+			e.preventDefault();
+			var content = $('#addinterest input[type="text"]').val();
+			$.ajax({
+				url:			apiUrl + 'interests/',
+				type:			'POST',
+				contentType:	'application/json',
+				dataType:		'json',
+				sucess: function(data) {
+					if (data.Status) {
+						$('#intersts').append('<li class="interest"><a class="delete" data-id="'+ data.Status+'">x</a>' + content + '</li>');
+						$('#addinterest input[type="text"]').val('');
+					} else {
+						alert(data);
+					}
+				}
+			})
+		});
+
+		//Supprimer un element d'interet a la liste
+		$('body').on('click', '.delete', function(e){
+			e.preventDefault();
+			var self = $(this);
+			var id = self.attr('data-id');
+			$ajax({
+				url:		apiUrl + '/interests/' + id,
+				type:		'DELETE',
+				success:	function(data) {
+					if (data.Status == 'ok') {
+						self.parent('.interest').remove();
+					} else {
+						alert(data);
+					}
+				}
+			})
+		});
+
+	});
+
+	</script>
 </head>
 <body>
 
 	<p>Hello {{.Firstname}} {{.Lastname}}</p>
 	<a href="/logout">Logout</a>
+
+	<form id="addinterest" action="#" method="POST">
+		<input type="text" name="content"/>
+		<input type="submit" value="Add"/>
+	</form>
 
 
 </body>

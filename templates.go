@@ -22,6 +22,7 @@ type ProfileView struct {
 
 var templates = template.Must(template.ParseFiles(
 	TEMPLATE_DIRECTORY+"home.html",
+	TEMPLATE_DIRECTORY+"homeUser.html",
 	TEMPLATE_DIRECTORY+"inscription.html",
 	TEMPLATE_DIRECTORY+"users.html"))
 

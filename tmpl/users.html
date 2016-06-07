@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{{.Title}} Profile</title>
-	<link rel="stylesheet" media="all" href="assets/css/{{.Stylesheet}}">
+	<title>{{.Title}}</title>
+	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
 </head>
 <body>
 
 	<ul>
-		{{ range $key, $user := .users }}
-		   <li>{{ $user.firstname }} {{ $user.Lastname }}</li>
+		{{ range $key, $user := .Users }}
+		   <li>{{ $user.Username }} {{ $user.Sexe }}</li>
 		{{ end }}
 	</ul>
 
