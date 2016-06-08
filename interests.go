@@ -31,6 +31,7 @@ func getInterestId(label string, userid int) int64 {
 	if id != -1 {
 		smt, err := database.Prepare("INSERT IGNORE INTO userinterest (interestid, userid) VALUES (?, ?)")
 		checkErr(err)
+		defer smt.Close()
 		res, err := smt.Exec(id, userid)
 		checkErr(err)
 		t, err := res.RowsAffected()

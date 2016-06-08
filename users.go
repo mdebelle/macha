@@ -74,7 +74,7 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 
 	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")
 	checkErr(err)
-	defer smt.Close()
+	//	defer smt.Close()
 	_, err = smt.Exec(user.Username, user.Firstname, user.Lastname, user.Email, user.Password)
 	checkErr(err)
 	http.Redirect(w, r, "/", http.StatusFound)
@@ -239,6 +239,7 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 
 	smt, err := database.Prepare("DELETE FROM userinterest WHERE interestid=? AND userid=?")
 	checkErr(err)
+	defer smt.Close()
 	_, err = smt.Exec(id, session.Values["id"])
 	checkErr(err)
 	writeJson(w, ResponseStatus{Status: "ok"})
