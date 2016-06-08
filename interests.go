@@ -29,10 +29,16 @@ func getInterestId(label string, userid int) int64 {
 
 	}
 	if id != -1 {
-		smt, err := database.Prepare("INSERT userinterest SET interestid=?, userid=?")
+		smt, err := database.Prepare("INSERT IGNORE INTO userinterest (interestid, userid) VALUES (?, ?)")
 		checkErr(err)
-		_, err = smt.Exec(id, userid)
+		res, err := smt.Exec(id, userid)
 		checkErr(err)
+		t, err := res.RowsAffected()
+		checkErr(err)
+		fmt.Println("rows", t)
+		if t == 0 {
+			return -1
+		}
 	}
 	return id
 }

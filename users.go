@@ -118,7 +118,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 
 	renderTemplate(w, "users", &usersView{
 		Title:      "All Macha Users",
-		Stylesheet: "home.css",
+		Stylesheet: "homeUser.css",
 		Users:      users})
 }
 
@@ -187,7 +187,11 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 	interest.Id = getInterestId(interest.Label, session.Values["id"].(int))
 
 	fmt.Println(interest)
-	writeJson(w, ResponseStatus{Status: strconv.Itoa(int(interest.Id))})
+	if interest.Id == -1 {
+		writeJson(w, ResponseStatus{Status: "ok"})
+	} else {
+		writeJson(w, ResponseStatus{Status: strconv.Itoa(int(interest.Id))})
+	}
 }
 
 func getUsersInterests(w http.ResponseWriter, r *http.Request) {
@@ -202,8 +206,9 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	userid := session.Values["id"].(int)
 	fmt.Println(userid)
-	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid  WHERE userinterest.userid=?")
+	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
 	checkErr(err)
+	defer smt.Close()
 	rows, err := smt.Query(userid)
 	checkErr(err)
 
@@ -232,12 +237,12 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 
 	id := pat.Param(ctx, "interestid")
 
-	smt, err := database.Prepare("DELETE * WHERE interestid=? AND userid=?")
+	smt, err := database.Prepare("DELETE FROM userinterest WHERE interestid=? AND userid=?")
 	checkErr(err)
 	_, err = smt.Exec(id, session.Values["id"])
 	checkErr(err)
+	writeJson(w, ResponseStatus{Status: "ok"})
 
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // func postUsersImages(ctx context.Context, w http.ResponseWriter, r *http.Request) {

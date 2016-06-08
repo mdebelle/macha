@@ -15,11 +15,11 @@
 		$.ajax({
 			url:	apiUrl + 'interests/',
 			type:	'GET',
-			sucess: function(data) {
+			success: function(data) {
 				console.log("ici");
 				if (data) {
 					$.each(data, function(index, value){
-						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ value.Id+'">x</a>' + value.Label + '</li>');
+						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ value.Id+'">x</a>  ' + value.Label + '</li>');
 					})
 				} else {
 					alert(data)
@@ -42,10 +42,12 @@
 				data:			JSON.stringify({Label:content}),
 				contentType:	'application/json',
 				dataType:		'json',
-				sucess:			function(data) {
+				success:		function(data) {
 					console.log("la");
-					if (data.Status) {
-						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ data.Status+'">x</a>' + content + '</li>');
+					if (data.Status == 'ok') {
+						$('#addinterest input[type="text"]').val('');
+					} else if (data.Status) {
+						$('#interests').append('<li class="interest"><a class="delete" data-id="'+ data.Status+'">x</a>  ' + content + '</li>');
 						$('#addinterest input[type="text"]').val('');
 					} else {
 						alert(data);
@@ -59,10 +61,11 @@
 			e.preventDefault();
 			var self = $(this);
 			var id = self.attr('data-id');
-			$ajax({
-				url:		apiUrl + '/interests/' + id,
+			$.ajax({
+				url:		apiUrl + 'interests/' + id,
 				type:		'DELETE',
 				success:	function(data) {
+					console.log
 					if (data.Status == 'ok') {
 						self.parent('.interest').remove();
 					} else {
@@ -79,16 +82,18 @@
 <body>
 
 	<p>Hello {{.Firstname}} {{.Lastname}}</p>
+	
+	<form id="addinterest" action="#" method="POST">
+		<input type="text" name="label"/>
+		<input type="submit" value="Add"/>
+	</form>
+
 	<ul id="interests">
 		
 	</ul>
 
 	<a href="/logout">Logout</a>
 
-	<form id="addinterest" action="#" method="POST">
-		<input type="text" name="label"/>
-		<input type="submit" value="Add"/>
-	</form>
 
 
 
