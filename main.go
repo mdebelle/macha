@@ -7,35 +7,38 @@ import (
 	"goji.io"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
-	"io"
 	"log"
 	"net/http"
-	"time"
 )
 
-type MinimumInfo struct {
-	Title      string
-	Stylesheet string
-	Firstname  string
-	Lastname   string
-}
+// type MinimumInfo struct {
+// 	Title      string
+// 	Stylesheet string
+// 	Firstname  string
+// 	Lastname   string
+// }
 
 type ResponseStatus struct {
 	Status string
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home", &RequiredData{Title: "Homepage", Stylesheet: "home.css"})
+	renderTemplate(w, "home", &HomeView{
+		Header: HeadData{
+			Title:      "Homepage",
+			Stylesheet: []string{"home.css"}}})
 }
 
 func connectedUser(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
-	var v MinimumInfo
+	var v homeUserView
 	if session.Values["connected"] == true {
-		v.Stylesheet = "home.css"
-		v.Firstname = session.Values["Firstname"].(string)
-		v.Lastname = session.Values["Lastname"].(string)
+		v.Header = HeadData{
+			Title:      "Bonjour " + session.Values["Firstname"].(string) + " " + session.Values["Lastname"].(string),
+			Stylesheet: []string{"homeUser.css"},
+			Scripts:    []string{}}
+		v.User = session.Values["UserInfo"].(UserData)
 	} else {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
@@ -44,7 +47,10 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func inscription(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "inscription", &RequiredData{Title: "Inscription", Stylesheet: "inscription.css"})
+	renderTemplate(w, "inscription", &inscriptionVew{
+		Header: HeadData{
+			Title:      "Inscription",
+			Stylesheet: []string{"inscription.css"}}})
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -61,32 +67,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 	user, err := checkLoginUser(username, password)
 	checkErr(err)
 	session.Values["connected"] = true
-	session.Values["id"] = user.Id
-	session.Values["Firstname"] = user.Firstname
-	session.Values["Lastname"] = user.Lastname
+	session.Values["UserInfo"] = user
 	session.Save(r, w)
 	http.Redirect(w, r, "/me", http.StatusFound)
 
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-
 	session, _ := store.Get(r, "session")
 	session.Values["connected"] = false
 	session.Save(r, w)
 	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func staticfiles(w http.ResponseWriter, r *http.Request) {
-	static_file := r.URL.Path[len("/css/"):]
-	if len(static_file) != 0 {
-		f, err := http.Dir(CSS_DIRECTORY).Open(static_file)
-		if err == nil {
-			content := io.ReadSeeker(f)
-			http.ServeContent(w, r, static_file, time.Now(), content)
-			return
-		}
-	}
 }
 
 func writeJson(w http.ResponseWriter, v interface{}) {
@@ -157,7 +148,8 @@ func main() {
 	// mux.HandleFuncC(pat.Get("search/orientation/:id/Users"), getOrientationUsers)
 	// mux.HandleFuncC(pat.Get("search/sexe/:sexeid/orientation/:orientationid/Users"), getSexeOrientationUsers)
 
-	mux.HandleFunc(pat.Get("/css/*"), staticfiles)
+	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)
+	mux.HandleFunc(pat.Get("/js/*"), staticJsFiles)
 
 	log.Fatal(http.ListenAndServe(":4242", mux))
 

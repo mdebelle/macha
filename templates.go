@@ -5,19 +5,41 @@ import (
 	"net/http"
 )
 
-type RequiredData struct {
+type HeadData struct {
 	Title      string
-	Stylesheet string
+	Stylesheet []string
+	Scripts    []string
 }
 
-type NotFoundView struct {
-	Data  RequiredData
-	Field string
+type UserData struct {
+	Id          int
+	UserName    string
+	FirstName   string
+	LastName    string
+	Email       string
+	Bio         string
+	Sexe        int
+	Orientation int
+	Popularity  int
+	Interests   []Interest
 }
 
-type ProfileView struct {
-	Data        RequiredData
-	ProfileUser User
+type HomeView struct {
+	Header HeadData
+}
+
+type usersView struct {
+	Header HeadData
+	Users  []UserData
+}
+
+type homeUserView struct {
+	Header HeadData
+	User   UserData
+}
+
+type inscriptionVew struct {
+	Header HeadData
 }
 
 var templates = template.Must(template.ParseFiles(

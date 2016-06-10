@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -42,9 +41,6 @@ func checkLoginUser(username string, password []byte) (User, error) {
 	var user User
 	var spassword []byte
 
-	fmt.Println("verifier le log d'un utilisateur")
-
-	fmt.Println(username)
 	err := database.QueryRow("SELECT id, Firstname, Lastname, password FROM user WHERE username=?", username).Scan(&user.Id, &user.Firstname, &user.Lastname, &spassword)
 	switch {
 	case err == sql.ErrNoRows:
@@ -60,8 +56,6 @@ func checkLoginUser(username string, password []byte) (User, error) {
 
 func postUsers(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("ajouter un utilisateur")
-
 	p, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
 	checkErr(err)
 
@@ -74,23 +68,13 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 
 	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")
 	checkErr(err)
-	//	defer smt.Close()
+	defer smt.Close()
 	_, err = smt.Exec(user.Username, user.Firstname, user.Lastname, user.Email, user.Password)
 	checkErr(err)
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-type usersView struct {
-	Title      string
-	Stylesheet string
-	Firstname  string
-	Lastname   string
-	Users      []User
-}
-
 func getUsers(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("recuperer les utilisateurs")
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
@@ -98,28 +82,30 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	smt, err := database.Prepare("SELECT username, sexe, orientation, bio, popularite FROM user")
+	smt, err := database.Prepare("SELECT id, username, sexe, orientation, bio, popularite FROM user")
 	checkErr(err)
 	defer smt.Close()
 	rows, err := smt.Query()
 	checkErr(err)
 	defer rows.Close()
 
-	var users []User
+	var users []UserData
 	var i int
 	for rows.Next() {
-		users = append(users, User{})
-		err := rows.Scan(&users[i].Username, &users[i].Sexe, &users[i].Orientation, &users[i].Bio, &users[i].Popularite)
+		users = append(users, UserData{})
+		err := rows.Scan(&users[i].Id, &users[i].UserName, &users[i].Sexe, &users[i].Orientation, &users[i].Bio, &users[i].Popularity)
 		checkErr(err)
+		users[i].Interests = getUserInterests(users[i].Id)
 		i++
 	}
 	err = rows.Err()
 	checkErr(err)
-
-	renderTemplate(w, "users", &usersView{
-		Title:      "All Macha Users",
-		Stylesheet: "homeUser.css",
-		Users:      users})
+	renderTemplate(w, "users", &homeUserView{
+		Header: HeaderData{
+			Title:      "Profile",
+			Stylesheet: "homeUser.css",
+			Scripts:    "homeUser.js"},
+		Users: users})
 }
 
 // func putUsers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -170,8 +156,6 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	var interest Interest
 
-	fmt.Println("ajouter les interets des utiliateurs")
-
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusFound)
@@ -182,11 +166,9 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 	err = json.Unmarshal(body, &interest)
 	checkErr(err)
-	fmt.Println(interest)
 
 	interest.Id = getInterestId(interest.Label, session.Values["id"].(int))
 
-	fmt.Println(interest)
 	if interest.Id == -1 {
 		writeJson(w, ResponseStatus{Status: "ok"})
 	} else {
@@ -194,9 +176,28 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUsersInterests(w http.ResponseWriter, r *http.Request) {
+func getUserInterest(id int) []Interest {
+	userid := session.Values["id"].(int)
+	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
+	checkErr(err)
+	defer smt.Close()
+	rows, err := smt.Query(userid)
+	checkErr(err)
 
-	fmt.Println("recuperer les interets de l'utiliateurs")
+	var interests []Interest
+	var i int
+	for rows.Next() {
+		interests = append(interests, Interest{})
+		err := rows.Scan(&interests[i].Id, &interests[i].Label)
+		checkErr(err)
+		i++
+	}
+	err = rows.Err()
+	checkErr(err)
+	writeJson(w, interests)
+}
+
+func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
@@ -205,7 +206,7 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userid := session.Values["id"].(int)
-	fmt.Println(userid)
+
 	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
 	checkErr(err)
 	defer smt.Close()
@@ -226,8 +227,6 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("supprimez les interets des utiliateurs")
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
