@@ -1,83 +1,18 @@
 package main
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 )
 
-// type MinimumInfo struct {
-// 	Title      string
-// 	Stylesheet string
-// 	Firstname  string
-// 	Lastname   string
-// }
-
 type ResponseStatus struct {
 	Status string
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home", &HomeView{
-		Header: HeadData{
-			Title:      "Homepage",
-			Stylesheet: []string{"home.css"}}})
-}
-
-func connectedUser(w http.ResponseWriter, r *http.Request) {
-
-	session, _ := store.Get(r, "session")
-	var v homeUserView
-	if session.Values["connected"] == true {
-		v.Header = HeadData{
-			Title:      "Bonjour " + session.Values["Firstname"].(string) + " " + session.Values["Lastname"].(string),
-			Stylesheet: []string{"homeUser.css"},
-			Scripts:    []string{}}
-		v.User = session.Values["UserInfo"].(UserData)
-	} else {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-	renderTemplate(w, "homeUser", &v)
-}
-
-func inscription(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "inscription", &inscriptionVew{
-		Header: HeadData{
-			Title:      "Inscription",
-			Stylesheet: []string{"inscription.css"}}})
-}
-
-func login(w http.ResponseWriter, r *http.Request) {
-
-	session, _ := store.Get(r, "session")
-	if session.Values["connected"] == true {
-		http.Redirect(w, r, "/me", http.StatusFound)
-		return
-	}
-	username := r.FormValue("username")
-	password, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
-	checkErr(err)
-
-	user, err := checkLoginUser(username, password)
-	checkErr(err)
-	session.Values["connected"] = true
-	session.Values["UserInfo"] = user
-	session.Save(r, w)
-	http.Redirect(w, r, "/me", http.StatusFound)
-
-}
-
-func logout(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
-	session.Values["connected"] = false
-	session.Save(r, w)
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func writeJson(w http.ResponseWriter, v interface{}) {
@@ -95,6 +30,20 @@ func checkErr(err error) {
 	}
 }
 
+func home(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "home", &HomeView{
+		Header: HeadData{
+			Title:      "Homepage",
+			Stylesheet: []string{"home.css"}}})
+}
+
+func inscription(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "inscription", &inscriptionVew{
+		Header: HeadData{
+			Title:      "Inscription",
+			Stylesheet: []string{"inscription.css"}}})
+}
+
 func main() {
 
 	fmt.Println("localhost:4242")
@@ -104,13 +53,16 @@ func main() {
 	fmt.Println("Database Created")
 	defer database.Close()
 
+	gob.Register(UserData{})
+
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Get("/"), home)
-
 	mux.HandleFunc(pat.Get("/inscription"), inscription)
+
 	mux.HandleFunc(pat.Post("/login"), login)
 	mux.HandleFunc(pat.Get("/logout"), logout)
+
 	mux.HandleFunc(pat.Get("/me"), connectedUser)
 
 	mux.HandleFunc(pat.Post("/users"), postUsers)

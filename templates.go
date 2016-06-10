@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"html/template"
 	"net/http"
 )
@@ -17,10 +18,10 @@ type UserData struct {
 	FirstName   string
 	LastName    string
 	Email       string
-	Bio         string
-	Sexe        int
-	Orientation int
-	Popularity  int
+	Bio         sql.NullString
+	Sexe        sql.NullInt64
+	Orientation sql.NullInt64
+	Popularity  sql.NullInt64
 	Interests   []Interest
 }
 

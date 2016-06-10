@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -36,21 +37,25 @@ func testEq(a, b []byte) bool {
 	return true
 }
 
-func checkLoginUser(username string, password []byte) (User, error) {
+func checkLoginUser(username string, password []byte) (UserData, error) {
 
-	var user User
+	var user UserData
 	var spassword []byte
 
-	err := database.QueryRow("SELECT id, Firstname, Lastname, password FROM user WHERE username=?", username).Scan(&user.Id, &user.Firstname, &user.Lastname, &spassword)
+	err := database.QueryRow("SELECT id, Firstname, Lastname, Email, Bio, Sexe, Orientation, Popularity, password FROM user WHERE username=?", username).Scan(
+		&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Bio, &user.Sexe, &user.Orientation, &user.Popularity, &spassword)
 	switch {
 	case err == sql.ErrNoRows:
 		return user, errors.New("empty")
 	case err != nil:
 		return user, err
 	}
-	if testEq(password, spassword) {
+	fmt.Println(password, spassword)
+	if bcrypt.CompareHashAndPassword(spassword, password) != nil {
+		//	if !testEq(password, spassword) {
 		return user, errors.New("wrong Password")
 	}
+	user.UserName = username
 	return user, nil
 }
 
@@ -95,17 +100,35 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 		users = append(users, UserData{})
 		err := rows.Scan(&users[i].Id, &users[i].UserName, &users[i].Sexe, &users[i].Orientation, &users[i].Bio, &users[i].Popularity)
 		checkErr(err)
-		users[i].Interests = getUserInterests(users[i].Id)
+		users[i].Interests = getUserInterestsList(users[i].Id)
 		i++
 	}
 	err = rows.Err()
 	checkErr(err)
-	renderTemplate(w, "users", &homeUserView{
-		Header: HeaderData{
+	renderTemplate(w, "users", &usersView{
+		Header: HeadData{
 			Title:      "Profile",
-			Stylesheet: "homeUser.css",
-			Scripts:    "homeUser.js"},
+			Stylesheet: []string{"users.css"}},
 		Users: users})
+}
+
+func getUserInterestsList(userid int) []Interest {
+
+	smt, err := database.Prepare("SELECT interest.id interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
+	checkErr(err)
+	defer smt.Close()
+	rows, err := smt.Query(userid)
+	checkErr(err)
+
+	var interests []Interest
+	var i int
+	for rows.Next() {
+		interests = append(interests, Interest{})
+		err := rows.Scan(&interests[i].Id, &interests[i].Label)
+		checkErr(err)
+		i++
+	}
+	return interests
 }
 
 // func putUsers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -174,27 +197,6 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 	} else {
 		writeJson(w, ResponseStatus{Status: strconv.Itoa(int(interest.Id))})
 	}
-}
-
-func getUserInterest(id int) []Interest {
-	userid := session.Values["id"].(int)
-	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
-	checkErr(err)
-	defer smt.Close()
-	rows, err := smt.Query(userid)
-	checkErr(err)
-
-	var interests []Interest
-	var i int
-	for rows.Next() {
-		interests = append(interests, Interest{})
-		err := rows.Scan(&interests[i].Id, &interests[i].Label)
-		checkErr(err)
-		i++
-	}
-	err = rows.Err()
-	checkErr(err)
-	writeJson(w, interests)
 }
 
 func getUsersInterests(w http.ResponseWriter, r *http.Request) {

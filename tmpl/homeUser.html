@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{{.Title}} Profile</title>
-	<link rel="stylesheet" media="all" href="css/{{.Stylesheet}}">
+<head>
+	<title>{{.Header.Title}} | Matcha</title>
+	{{ range $key, $val := .Header.Stylesheet }}
+		<link rel="stylesheet" media="all" href="css/{{$val}}">
+	{{ end }}
 	<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-	<script type="text/javascript">
-
-
-	</script>
 </head>
 <body>
 
-	<p>Hello {{.Firstname}} {{.Lastname}}</p>
+	<p>Hello {{.User.FirstName}} {{.User.LastName}}</p>
 	
 	<form id="addinterest" action="#" method="POST">
 		<input type="text" name="label"/>
 		<input type="submit" value="Add"/>
 	</form>
 
-	<ul id="interests">
-		
+	<ul id="interests">	
+	{{ range $key, $val := .User.Interests }}
+		<li class="interest"><a class="delete" data-id="{{ $val.Id }}">x</a>{{ $val.Label }}</li>
+	{{ end }}
 	</ul>
 
 	<a href="/logout">Logout</a>
 
-
-
-
-	<script type="text/javascript"  src="/js/{{.Scripts}}"></script>
+	{{ range $key, $val := .Header.Scripts }}
+		<script type="text/javascript"  src="js/{{$val}}"></script>
+	{{ end }}
+	
 </body>
 </html>
