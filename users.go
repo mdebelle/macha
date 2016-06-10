@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -50,9 +49,7 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 	case err != nil:
 		return user, err
 	}
-	fmt.Println(password, spassword)
 	if bcrypt.CompareHashAndPassword(spassword, password) != nil {
-		//	if !testEq(password, spassword) {
 		return user, errors.New("wrong Password")
 	}
 	user.UserName = username
@@ -207,12 +204,10 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userid := session.Values["id"].(int)
-
 	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
 	checkErr(err)
 	defer smt.Close()
-	rows, err := smt.Query(userid)
+	rows, err := smt.Query(session.Values["UserInfo"].(UserData).Id)
 	checkErr(err)
 
 	var interests []Interest
@@ -241,7 +236,7 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 	smt, err := database.Prepare("DELETE FROM userinterest WHERE interestid=? AND userid=?")
 	checkErr(err)
 	defer smt.Close()
-	_, err = smt.Exec(id, session.Values["id"])
+	_, err = smt.Exec(id, session.Values["UserInfo"].(UserData).Id)
 	checkErr(err)
 	writeJson(w, ResponseStatus{Status: "ok"})
 

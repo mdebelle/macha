@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "golang.org/x/crypto/bcrypt"
+	"fmt"
 	"net/http"
 )
 
@@ -11,7 +11,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 	var v homeUserView
 	if session.Values["connected"] == true {
 		v.Header = HeadData{
-			Title:      "Bonjour " + session.Values["Firstname"].(string) + " " + session.Values["Lastname"].(string),
+			Title:      "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
 			Stylesheet: []string{"homeUser.css"},
 			Scripts:    []string{"homeUser.js"}}
 		v.User, _ = session.Values["UserInfo"].(UserData)
@@ -25,6 +25,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 func login(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
+	fmt.Println(session)
 	if session.Values["connected"] == true {
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
@@ -39,6 +40,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func logout(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
+	session.Options.MaxAge = 0
 	session.Values["connected"] = false
 	session.Save(r, w)
 	http.Redirect(w, r, "/", http.StatusFound)
