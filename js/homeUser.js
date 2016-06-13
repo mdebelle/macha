@@ -71,9 +71,8 @@
 			type:	'GET',
 			success: function(data) {
 				if (data) {
-					var d = String(data.Date).split();
-					console.log(d[0]);
-					$('#changebirthdate input[type="text"]').val(d[0])
+					console.log(data.Status)
+					$('#changebirthdate input[type="date"]').val(data.Status)
 				} else {
 					console.log("quel age ??");
 				}

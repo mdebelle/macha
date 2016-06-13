@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	// "fmt"
+	"fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -269,8 +269,16 @@ func postUsersAge(w http.ResponseWriter, r *http.Request) {
 	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
 	checkErr(err)
 
-	session.Values["UserInfo"].(UserData).BirthDate = time.Now()
+	// Mettre a jours la session
+	var u = session.Values["UserInfo"].(UserData)
+
+	fmt.Println(u)
+
+	database.QueryRow("SELECT BirthDate FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.BirthDate)
+	checkErr(err)
+	session.Values["UserInfo"] = u
 	session.Save(r, w)
+
 	writeJson(w, ResponseStatus{Status: "ok"})
 
 }
@@ -282,7 +290,8 @@ func getUsersAge(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).BirthDate.String()})
+	fmt.Println(session.Values["UserInfo"].(UserData))
+	writeJson(w, ResponseStatus{Status: string(session.Values["UserInfo"].(UserData).BirthDate)})
 }
 
 // func postUsersImages(ctx context.Context, w http.ResponseWriter, r *http.Request) {
