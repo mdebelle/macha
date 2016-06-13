@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"html/template"
 	"net/http"
+	"time"
 )
 
 type HeadData struct {
@@ -17,6 +18,7 @@ type UserData struct {
 	UserName    string
 	FirstName   string
 	LastName    string
+	BirthDate   time.Time
 	Email       string
 	Bio         sql.NullString
 	Sexe        sql.NullInt64

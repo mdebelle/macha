@@ -43,7 +43,7 @@ func initdatabase() {
 	checkErr(err)
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `userinterest` (`id` int(11) NOT NULL AUTO_INCREMENT, `interestid` int(11) NOT NULL, `userid` int(11) NOT NULL, PRIMARY KEY (`id`), UNIQUE KEY `idunik` (`interestid`,`userid`))")
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(40) NOT NULL, `firstname` varchar(40) NOT NULL, `lastname` varchar(40) NOT NULL, `email` varchar(255) NOT NULL, `password` varbinary(255) NOT NULL, `sexe` tinyint(4) DEFAULT NULL, `orientation` tinyint(4) DEFAULT NULL, `bio` longtext DEFAULT NULL, `popularity` int(11) DEFAULT NULL, PRIMARY KEY (`id`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(40) NOT NULL, `firstname` varchar(40) NOT NULL, `lastname` varchar(40) NOT NULL, `birthdate` date NOT NULL, `email` varchar(255) NOT NULL, `password` varbinary(255) NOT NULL, `sexe` tinyint(4) DEFAULT NULL, `orientation` tinyint(4) DEFAULT NULL, `bio` longtext DEFAULT NULL, `popularity` int(11) DEFAULT NULL, PRIMARY KEY (`id`))")
 	checkErr(err)
 	database = db
 }

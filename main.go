@@ -84,6 +84,10 @@ func main() {
 	mux.HandleFunc(pat.Get("/users/me/interests/"), getUsersInterests)
 	mux.HandleFuncC(pat.Delete("/users/me/interests/:interestid"), deleteUsersInterests)
 
+	// User's age Road
+	mux.HandleFunc(pat.Put("/users/me/age/"), postUsersAge)
+	mux.HandleFunc(pat.Get("/users/me/age/"), getUsersAge)
+
 	// // User's images Road
 	// mux.HandleFuncC(pat.Post("/users/:id/images/"), postUsersImages)
 	// mux.HandleFuncC(pat.Put("/users/:id/images/:idimage"), putUsersImageProfile)

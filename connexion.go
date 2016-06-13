@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 )
 
@@ -30,6 +31,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
 	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	userIP := net.ParseIP(ip)
+	fmt.Println(userIP)
+
 	user, err := checkLoginUser(r.FormValue("username"), []byte(r.FormValue("password")))
 	checkErr(err)
 	session.Values["connected"] = true

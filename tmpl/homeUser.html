@@ -12,10 +12,14 @@
 
 	<p>Hello {{.User.FirstName}} {{.User.LastName}}</p>
 	
-	<form id="addinterest" action="#" method="POST">
-		<input type="text" name="label"/>
-		<input type="submit" value="Add"/>
+	<form id="changebirthdate" action="#" method="PUT">
+		<p> <span class="label-user">Date de naissance :</span> <input class="input-user" type="date" name="birth"/> <input class="btn-user" type="submit" value="change"/> </p>
 	</form>
+
+	<form id="addinterest" action="#" method="POST">
+		<p> <span class="label-user">Centre d'interets :</span> <input class="input-user" type="text" name="label"/> <input class="btn-user" type="submit" value="Add"/> </p>
+	</form>
+
 
 	<ul id="interests">	
 	{{ range $key, $val := .User.Interests }}

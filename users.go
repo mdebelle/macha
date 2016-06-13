@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	// "fmt"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -41,8 +42,8 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 	var user UserData
 	var spassword []byte
 
-	err := database.QueryRow("SELECT id, Firstname, Lastname, Email, Bio, Sexe, Orientation, Popularity, password FROM user WHERE username=?", username).Scan(
-		&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.Bio, &user.Sexe, &user.Orientation, &user.Popularity, &spassword)
+	err := database.QueryRow("SELECT id, Firstname, Lastname, BirthDate, Email, Bio, Sexe, Orientation, Popularity, password FROM user WHERE username=?", username).Scan(
+		&user.Id, &user.FirstName, &user.LastName, &user.BirthDate, &user.Email, &user.Bio, &user.Sexe, &user.Orientation, &user.Popularity, &spassword)
 	switch {
 	case err == sql.ErrNoRows:
 		return user, errors.New("empty")
@@ -187,7 +188,7 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &interest)
 	checkErr(err)
 
-	interest.Id = getInterestId(interest.Label, session.Values["id"].(int))
+	interest.Id = getInterestId(interest.Label, session.Values["UserInfo"].(UserData).Id)
 
 	if interest.Id == -1 {
 		writeJson(w, ResponseStatus{Status: "ok"})
@@ -240,6 +241,48 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 	checkErr(err)
 	writeJson(w, ResponseStatus{Status: "ok"})
 
+}
+
+type PostAge struct {
+	Date string
+}
+
+func postUsersAge(w http.ResponseWriter, r *http.Request) {
+
+	var date PostAge
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &date)
+	checkErr(err)
+
+	smt, err := database.Prepare("UPDATE user SET user.birthdate=? WHERE id=?")
+	checkErr(err)
+	defer smt.Close()
+	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	session.Values["UserInfo"].(UserData).BirthDate = time.Now()
+	session.Save(r, w)
+	writeJson(w, ResponseStatus{Status: "ok"})
+
+}
+
+func getUsersAge(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).BirthDate.String()})
 }
 
 // func postUsersImages(ctx context.Context, w http.ResponseWriter, r *http.Request) {
