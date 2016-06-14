@@ -12,6 +12,13 @@ type HeadData struct {
 	Scripts    []string
 }
 
+type SimpleUser struct {
+	Id          int64
+	Bod			int
+	UserName    string
+}
+
+
 type UserData struct {
 	Id          int
 	UserName    string
@@ -24,6 +31,7 @@ type UserData struct {
 	Orientation sql.NullInt64
 	Popularity  sql.NullInt64
 	Interests   []Interest
+	Matches		[]SimpleUser
 }
 
 type HomeView struct {

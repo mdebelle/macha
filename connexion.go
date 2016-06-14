@@ -8,11 +8,17 @@ import (
 
 func connectedUser(w http.ResponseWriter, r *http.Request) {
 
-	session, _ := store.Get(r, "session")
+	session, err := store.Get(r, "session")
+	checkErr(err)
 	var v homeUserView
+
 	if session.Values["connected"] == true {
 		v.Header = HeadData{
+
+
 			Title:      "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
+
+
 			Stylesheet: []string{"homeUser.css"},
 			Scripts:    []string{"homeUser.js"}}
 		v.User, _ = session.Values["UserInfo"].(UserData)

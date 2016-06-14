@@ -235,5 +235,24 @@
 			})
 		});
 
+		//Trouver des utilisateurs
+		$.ajax({
+			url:	apiUrl + 'matches/',
+			type:	'GET',
+			success: function(data) {
+				if (data) {
+					$.each(data, function(index, value){
+						console.log(value);
+						$('#matches').append('<li class="matche"><a href="users/' + value.Id + '">' + value.UserName + ' | ' + value.Bod + ' ans</a></li>');
+					})
+				} else {
+					console.log("ne s'interesse a rien pour le moment")
+				}
+			},
+			error: function(xhr,status,error) {
+				console.log(error);
+			}
+		});
+
 
 	});

@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
+	// "strings"
 )
 
 func testEq(a, b []byte) bool {
@@ -434,6 +436,47 @@ func getUsersLastName(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(session.Values["UserInfo"].(UserData))
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).LastName})
+}
+
+func getUsersMatches(w http.ResponseWriter, r *http.Request) {
+	
+	const layouttime = "2006-01-02"
+	tnow := time.Now()
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	smt, err := database.Prepare("SELECT id, Username, Birthdate FROM user WHERE id!=?")
+	checkErr(err)
+	defer smt.Close()
+	rows, err := smt.Query(session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	var users []SimpleUser
+	var i int
+	for rows.Next() {
+		users = append(users, SimpleUser{})
+		var dob []uint8
+		err := rows.Scan(&users[i].Id, &users[i].UserName, &dob)
+		if dob != nil {
+			fmt.Println("he")
+	//		d := strings.Split(string(dob), "-")
+	//		fmt.Println(d)
+	//		if len(d) > 0 {
+	//			t, err := time.Parse(layouttime, d[0]+"-"+d[2]+"-"+d[1])
+				t, err := time.Parse(layouttime, string(dob))
+				users[i].Bod = tnow.Year() - t.Year()
+				checkErr(err)
+			// }
+		}
+		checkErr(err)
+		i++
+	}
+	
+	writeJson(w, users)
 }
 
 

@@ -42,6 +42,12 @@
 	<div class="separator"></div>
 	<h2>Profiles suggérés</h2>
 
+	<ul id="matches">	
+		{{ range $key, $val := .User.Matches }}
+			<li class="matche"><a href="users/{{ $val.Id }}">{{ $val.UserName }} | {{ $val.Bod }} ans</a></li>
+		{{ end }}
+	</ul>
+
 	<div class="separator"></div>
 
 	{{ range $key, $val := .Header.Scripts }}
