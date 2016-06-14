@@ -31,6 +31,11 @@ func checkErr(err error) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] == true {
+		http.Redirect(w, r, "/me", http.StatusFound)
+		return
+	}
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
 			Title:      "Homepage",
@@ -87,6 +92,17 @@ func main() {
 	// User's age Road
 	mux.HandleFunc(pat.Put("/users/me/age/"), postUsersAge)
 	mux.HandleFunc(pat.Get("/users/me/age/"), getUsersAge)
+	// User's username Road
+	mux.HandleFunc(pat.Put("/users/me/username/"), postUsersUsername)
+	mux.HandleFunc(pat.Get("/users/me/username/"), getUsersUsername)
+
+	// User's firstname Road
+	mux.HandleFunc(pat.Put("/users/me/firstname/"), postUsersFirstName)
+	mux.HandleFunc(pat.Get("/users/me/firstname/"), getUsersFirstName)
+
+	// User's lastname Road
+	mux.HandleFunc(pat.Put("/users/me/lastname/"), postUsersLastName)
+	mux.HandleFunc(pat.Get("/users/me/lastname/"), getUsersLastName)
 
 	// // User's images Road
 	// mux.HandleFuncC(pat.Post("/users/:id/images/"), postUsersImages)

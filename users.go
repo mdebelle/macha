@@ -294,6 +294,150 @@ func getUsersAge(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, ResponseStatus{Status: string(session.Values["UserInfo"].(UserData).BirthDate)})
 }
 
+func postUsersUsername(w http.ResponseWriter, r *http.Request) {
+
+	var date PostAge
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &date)
+	checkErr(err)
+
+	smt, err := database.Prepare("UPDATE user SET user.username=? WHERE id=?")
+	checkErr(err)
+	defer smt.Close()
+	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	// Mettre a jours la session
+	var u = session.Values["UserInfo"].(UserData)
+
+	fmt.Println(u)
+
+	database.QueryRow("SELECT UserName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.UserName)
+	checkErr(err)
+	session.Values["UserInfo"] = u
+	session.Save(r, w)
+
+	writeJson(w, ResponseStatus{Status: "ok"})
+
+}
+
+func getUsersUsername(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	fmt.Println(session.Values["UserInfo"].(UserData))
+	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).UserName})
+}
+
+func postUsersFirstName(w http.ResponseWriter, r *http.Request) {
+
+	var date PostAge
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &date)
+	checkErr(err)
+
+	smt, err := database.Prepare("UPDATE user SET user.FirstName=? WHERE id=?")
+	checkErr(err)
+	defer smt.Close()
+	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	// Mettre a jours la session
+	var u = session.Values["UserInfo"].(UserData)
+
+	fmt.Println(u)
+
+	database.QueryRow("SELECT FirstName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.FirstName)
+	checkErr(err)
+	session.Values["UserInfo"] = u
+	session.Save(r, w)
+
+	writeJson(w, ResponseStatus{Status: "ok"})
+
+}
+
+func getUsersFirstName(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	fmt.Println(session.Values["UserInfo"].(UserData))
+	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).FirstName})
+}
+
+
+func postUsersLastName(w http.ResponseWriter, r *http.Request) {
+
+	var date PostAge
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &date)
+	checkErr(err)
+
+	smt, err := database.Prepare("UPDATE user SET user.LastName=? WHERE id=?")
+	checkErr(err)
+	defer smt.Close()
+	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	// Mettre a jours la session
+	var u = session.Values["UserInfo"].(UserData)
+
+	fmt.Println(u)
+
+	database.QueryRow("SELECT LastName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.LastName)
+	checkErr(err)
+	session.Values["UserInfo"] = u
+	session.Save(r, w)
+
+	writeJson(w, ResponseStatus{Status: "ok"})
+
+}
+
+func getUsersLastName(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	fmt.Println(session.Values["UserInfo"].(UserData))
+	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).LastName})
+}
+
+
+
 // func postUsersImages(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 // 	id := pat.Param(ctx, "id")
 

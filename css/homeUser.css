@@ -8,10 +8,20 @@ body{
 
 .userTitle {
 	font-size: 30px;
+	text-transform: capitalize;
+	font-family: sans-serif;
 }
 a.logout {
 	text-decoration: none;
 	color: #ECF0F1;
+}
+
+.notification {
+	width: 36px;
+	text-align: center;
+    background: #ECF0F1;
+    display: inline-block;
+    color: #6C7A89;
 }
 
 .formField {
@@ -79,6 +89,8 @@ a.logout {
 ul#interests {
 	list-style: none;
 	padding: 0;
+	text-align: center;
+	min-height: 53px;
 }
 
 ul#interests li.interest{
@@ -86,8 +98,10 @@ ul#interests li.interest{
 	font-size: 24px;
 	background: #03C9A9;
 	display: inline-block;
+	margin-bottom: 5px;
 	margin-left: 5px;
 	padding: 10px;
+	text-transform: lowercase;
 }
 
 ul#interests li.interest:first-child {
@@ -98,6 +112,12 @@ ul#interests li.interest a.delete {
 	font-family: sans-serif;
 	color: #ECF0F1;
 	margin-right: 10px;
+}
+
+.separator {
+	border: solid 1px white;
+	width: 80%;
+	margin: 20px auto;
 }
 
 
