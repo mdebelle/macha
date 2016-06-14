@@ -6,19 +6,45 @@ body{
 	background-color: #26A65B;
 }
 
-.formField {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	background-color: #03C9A9;
+.userTitle {
+	font-size: 30px;
+}
+a.logout {
+	text-decoration: none;
+	color: #ECF0F1;
 }
 
-.formField input{
+.formField {
+	background-color: #03C9A9;
+	width: 100%;
+}
+
+.formField .label-user{
+	padding: 5px;
+	background-color: #03C9A9;
+	width: 28%;
+	font-size: 30px;
+	display: inline-flex;
+}
+
+.formField .input-user{
 	background-color: #ECF0F1;
-    width: 100%;
-    font-size: 30px;
-    outline: none;
-    border: none;
+	width: 45%;
+	font-size: 30px;
+	outline: none;
+	border: none;
 	padding: 15px;
+	height: 75px;
+}
+
+.formField .btn-user{
+	background-color: #ECF0F1;
+	width: 26%;
+	font-size: 30px;
+	outline: none;
+	border: none;
+	padding: 15px;
+	height: 75px;
 }
 
 .container {
@@ -50,5 +76,28 @@ body{
 	color: #6C7A89;
 }
 
+ul#interests {
+	list-style: none;
+	padding: 0;
+}
+
+ul#interests li.interest{
+	list-style: none;
+	font-size: 24px;
+	background: #03C9A9;
+	display: inline-block;
+	margin-left: 5px;
+	padding: 10px;
+}
+
+ul#interests li.interest:first-child {
+	margin-left: 0;
+}
+
+ul#interests li.interest a.delete {
+	font-family: sans-serif;
+	color: #ECF0F1;
+	margin-right: 10px;
+}
 
 
