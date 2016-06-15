@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Header.Title}} | Matcha</title>
+		{{ range $key, $val := .Header.Stylesheet }}
+			<link rel="stylesheet" media="all" href="css/{{$val}}">
+		{{ end }}
+		<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+	</head>
+	<body>
+
+	{{ if eq .Connection true }}
+		<h1 class="userTitle"><a href="/me">Hello <span id="userfirstname">{{.User.FirstName}}</span> <span id="userlastname">{{.User.LastName}}</span></a> | <span class="notification">0</span> | <span class="poppower">score <span id="popower-pts">0</span></span> | <a class="logout" href="/logout">Se déconnecter</a></h1>
+	{{ end }}
+		
+		<div class="container">
+			<p>C'est {{ .Profile.UserName }} agé de {{ .Profile.Bod }} ans</p>
+		</div>
+
+		{{ range $key, $val := .Header.Scripts }}
+			<script type="text/javascript"  src="js/{{$val}}"></script>
+		{{ end }}
+	</body>
+</html>

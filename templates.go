@@ -13,11 +13,10 @@ type HeadData struct {
 }
 
 type SimpleUser struct {
-	Id          int64
-	Bod			int
-	UserName    string
+	Id       int64
+	Bod      int
+	UserName string
 }
-
 
 type UserData struct {
 	Id          int
@@ -31,7 +30,7 @@ type UserData struct {
 	Orientation sql.NullInt64
 	Popularity  sql.NullInt64
 	Interests   []Interest
-	Matches		[]SimpleUser
+	Matches     []SimpleUser
 }
 
 type HomeView struct {
@@ -48,6 +47,13 @@ type homeUserView struct {
 	User   UserData
 }
 
+type publicProfileView struct {
+	Header     HeadData
+	Connection bool
+	User       UserData
+	Profile    SimpleUser
+}
+
 type inscriptionVew struct {
 	Header HeadData
 }
@@ -55,6 +61,7 @@ type inscriptionVew struct {
 var templates = template.Must(template.ParseFiles(
 	TEMPLATE_DIRECTORY+"home.html",
 	TEMPLATE_DIRECTORY+"homeUser.html",
+	TEMPLATE_DIRECTORY+"publicProfile.html",
 	TEMPLATE_DIRECTORY+"inscription.html",
 	TEMPLATE_DIRECTORY+"users.html"))
 

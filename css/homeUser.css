@@ -17,13 +17,23 @@ a.logout {
 }
 
 .notification {
-	width: 36px;
 	text-align: center;
     background: #ECF0F1;
     display: inline-block;
     color: #6C7A89;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
-
+.poppower {
+	text-align: center;
+    background: #ECF0F1;
+    display: inline-block;
+    color: #6C7A89;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
 .formField {
 	background-color: #03C9A9;
 	width: 100%;
@@ -58,7 +68,7 @@ a.logout {
 }
 
 .container {
-	width: 520px;
+	max-width: 820px;
 	margin: auto;
 }
 

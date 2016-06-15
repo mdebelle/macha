@@ -1,58 +1,56 @@
 <!DOCTYPE html>
 <html>
-<head>
-<head>
-	<title>{{.Header.Title}} | Matcha</title>
-	{{ range $key, $val := .Header.Stylesheet }}
-		<link rel="stylesheet" media="all" href="css/{{$val}}">
-	{{ end }}
-	<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-</head>
-<body>
-
-	<h1 class="userTitle">Hello <span id="userfirstname">{{.User.FirstName}}</span> <span id="userlastname">{{.User.LastName}}</span> | <span class="notification">0</span> |  <a class="logout" href="/logout">Se déconnecter</a></h1>
-	
-	<form id="changeusername" action="#" method="PUT">
-		<p class="formField"> <span class="label-user">Nom d'utilisateur</span> <input class="input-user" type="text" name="username"/> <input class="btn-user" type="submit" value="Changer"/> </p>
-	</form>
-	
-	<form id="changeuFirstname" action="#" method="PUT">
-		<p class="formField"> <span class="label-user">Prenom</span> <input class="input-user" type="text" name="firstname"/> <input class="btn-user" type="submit" value="Changer"/> </p>
-	</form>	
-
-	<form id="changeuLastname" action="#" method="PUT">
-		<p class="formField"> <span class="label-user">Nom de Famille</span> <input class="input-user" type="text" name="lastname"/> <input class="btn-user" type="submit" value="Changer"/> </p>
-	</form>
-
-	<form id="changebirthdate" action="#" method="PUT">
-		<p class="formField"> <span class="label-user">Date de naissance</span> <input class="input-user" type="date" name="birth"/> <input class="btn-user" type="submit" value="Changer"/> </p>
-	</form>
-
-	<form id="addinterest" action="#" method="POST">
-		<p class="formField"> <span class="label-user">Centre d'interets</span> <input class="input-user" type="text" name="label" maxlength="25"/> <input class="btn-user" type="submit" value="Ajouter"/> </p>
-	</form>
-
-
-	<ul id="interests">	
-		{{ range $key, $val := .User.Interests }}
-			<li class="interest"><a class="delete" data-id="{{ $val.Id }}">x</a>{{ $val.Label }}</li>
+	<head>
+		<title>{{.Header.Title}} | Matcha</title>
+		{{ range $key, $val := .Header.Stylesheet }}
+			<link rel="stylesheet" media="all" href="css/{{$val}}">
 		{{ end }}
-	</ul>
+		<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+	</head>
+	<body>
 
-	<div class="separator"></div>
-	<h2>Profiles suggérés</h2>
+		<h1 class="userTitle">Hello <span id="userfirstname">{{.User.FirstName}}</span> <span id="userlastname">{{.User.LastName}}</span> | <span class="notification">0</span> | <span class="poppower">score <span id="popower-pts">0</span></span> | <a class="logout" href="/logout">Se déconnecter</a></h1>
+		<div class="container">
 
-	<ul id="matches">	
-		{{ range $key, $val := .User.Matches }}
-			<li class="matche"><a href="users/{{ $val.Id }}">{{ $val.UserName }} | {{ $val.Bod }} ans</a></li>
+			<form id="changeusername" action="#" method="PUT">
+				<p class="formField"> <span class="label-user">Nom d'utilisateur</span> <input class="input-user" type="text" name="username"/> <input class="btn-user" type="submit" value="Changer"/> </p>
+			</form>
+
+			<form id="changeuFirstname" action="#" method="PUT">
+				<p class="formField"> <span class="label-user">Prenom</span> <input class="input-user" type="text" name="firstname"/> <input class="btn-user" type="submit" value="Changer"/> </p>
+			</form>
+
+			<form id="changeuLastname" action="#" method="PUT">
+				<p class="formField"> <span class="label-user">Nom de Famille</span> <input class="input-user" type="text" name="lastname"/> <input class="btn-user" type="submit" value="Changer"/> </p>
+			</form>
+
+			<form id="changebirthdate" action="#" method="PUT">
+				<p class="formField"> <span class="label-user">Date de naissance</span> <input class="input-user" type="date" name="birth"/> <input class="btn-user" type="submit" value="Changer"/> </p>
+			</form>
+
+			<form id="addinterest" action="#" method="POST">
+				<p class="formField"> <span class="label-user">Centre d'interets</span> <input class="input-user" type="text" name="label" maxlength="25"/> <input class="btn-user" type="submit" value="Ajouter"/> </p>
+			</form>
+
+			<ul id="interests">
+				{{ range $key, $val := .User.Interests }}
+					<li class="interest"><a class="delete" data-id="{{ $val.Id }}">x</a>{{ $val.Label }}</li>
+				{{ end }}
+			</ul>
+
+			<div class="separator"></div>
+			<h2>Profiles suggérés</h2>
+			<ul id="matches">
+				{{ range $key, $val := .User.Matches }}
+					<li class="matche"><a href="users/{{ $val.Id }}">{{ $val.UserName }} | {{ $val.Bod }} ans</a></li>
+				{{ end }}
+			</ul>
+			<div class="separator"></div>
+
+		</div>
+
+		{{ range $key, $val := .Header.Scripts }}
+			<script type="text/javascript"  src="js/{{$val}}"></script>
 		{{ end }}
-	</ul>
-
-	<div class="separator"></div>
-
-	{{ range $key, $val := .Header.Scripts }}
-		<script type="text/javascript"  src="js/{{$val}}"></script>
-	{{ end }}
-	
-</body>
+	</body>
 </html>

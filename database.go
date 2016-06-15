@@ -37,13 +37,44 @@ func initdatabase() {
 	//  DEFAULT COLLATE utf8_general_ci
 	//
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `image` (`id` int(11) NOT NULL AUTO_INCREMENT,`label` varchar(250) NOT NULL, `description` longtext NOT NULL, `userid` int(11) NOT NULL, PRIMARY KEY (`id`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `image` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`label` varchar(250) NOT NULL, " +
+		"`description` longtext NOT NULL, " +
+		"`userid` int(11) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `interest` (`id` int(11) NOT NULL AUTO_INCREMENT, `label` varchar(40) NOT NULL, PRIMARY KEY (`id`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `interest` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`label` varchar(40) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `userinterest` (`id` int(11) NOT NULL AUTO_INCREMENT, `interestid` int(11) NOT NULL, `userid` int(11) NOT NULL, PRIMARY KEY (`id`), UNIQUE KEY `idunik` (`interestid`,`userid`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `userinterest` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`interestid` int(11) NOT NULL, " +
+		"`userid` int(11) NOT NULL, " +
+		"PRIMARY KEY (`id`), UNIQUE KEY `idunik` (`interestid`,`userid`))")
 	checkErr(err)
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( `id` int(11) NOT NULL AUTO_INCREMENT, `username` varchar(40) NOT NULL, `firstname` varchar(40) NOT NULL, `lastname` varchar(40) NOT NULL, `birthdate` date DEFAULT NULL, `email` varchar(255) NOT NULL, `password` varbinary(255) NOT NULL, `sexe` tinyint(4) DEFAULT NULL, `orientation` tinyint(4) DEFAULT NULL, `bio` longtext DEFAULT NULL, `popularity` int(11) DEFAULT NULL, PRIMARY KEY (`id`))")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`username` varchar(40) NOT NULL, " +
+		"`firstname` varchar(40) NOT NULL, `" +
+		"lastname` varchar(40) NOT NULL, " +
+		"`birthdate` date DEFAULT NULL, " +
+		"`email` varchar(255) NOT NULL, " +
+		"`password` varbinary(255) NOT NULL, " +
+		"`sexe` tinyint(4) DEFAULT NULL, " +
+		"`orientation` tinyint(4) DEFAULT NULL, " +
+		"`bio` longtext DEFAULT NULL, " +
+		"`popularity` int(11) DEFAULT NULL, " +
+		"PRIMARY KEY (`id`))")
 	checkErr(err)
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `notification` ( " +
+		"`id` int(11) NOT NULL, " +
+		"`message` text, " +
+		"`date` date NOT NULL, " +
+		"`read` tinyint(1) NOT NULL DEFAULT '0', " +
+		"`userid` int(11) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
 	database = db
 }

@@ -7,8 +7,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
+	"golang.org/x/net/context"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type ResponseStatus struct {
@@ -30,16 +33,52 @@ func checkErr(err error) {
 	}
 }
 
+func transformAge(dob []uint8) int {
+	const layouttime = "2006-01-02"
+	tnow := time.Now()
+	t, _ := time.Parse(layouttime, string(dob))
+	return tnow.Year() - t.Year()
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
-	// session, _ := store.Get(r, "session")
-	// if session.Values["connected"] == true {
-	// 	http.Redirect(w, r, "/me", http.StatusFound)
-	// 	return
-	// }
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
 			Title:      "Homepage",
 			Stylesheet: []string{"home.css"}}})
+}
+
+func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	var user SimpleUser
+	var c bool
+	id := pat.Param(ctx, "id")
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] == true {
+		c = true
+	}
+
+	smt, err := database.Prepare("SELECT user.username, user.birthdate FROM user WHERE id=?")
+	checkErr(err)
+	smt.QueryRow(id).Scan(&user.UserName, &user.Bod)
+	user.Id, _ = strconv.ParseInt(id, 10, 64)
+	if c == false {
+		renderTemplate(w, "publicProfile", &publicProfileView{
+			Header: HeadData{
+				Title:      "Profile",
+				Stylesheet: []string{"publicProfile.css"}},
+			Connection: false,
+			Profile:    user})
+	} else {
+		renderTemplate(w, "publicProfile", &publicProfileView{
+			Header: HeadData{
+				Title:      "Profile",
+				Stylesheet: []string{"publicProfile.css"}},
+			Connection: true,
+			User:       session.Values["UserInfo"].(UserData),
+			Profile:    user})
+
+	}
 }
 
 func inscription(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +111,7 @@ func main() {
 
 	mux.HandleFunc(pat.Post("/users"), postUsers)
 	mux.HandleFunc(pat.Get("/users"), getUsers)
+	mux.HandleFuncC(pat.Get("/users/:id"), publicProfile)
 
 	// mux.HandleFuncC(pat.Put("/users/:id"), putUsers)
 	// mux.HandleFuncC(pat.Delete("/users/:id"), deleteUsers)
@@ -92,6 +132,7 @@ func main() {
 	// User's age Road
 	mux.HandleFunc(pat.Put("/users/me/age/"), postUsersAge)
 	mux.HandleFunc(pat.Get("/users/me/age/"), getUsersAge)
+
 	// User's username Road
 	mux.HandleFunc(pat.Put("/users/me/username/"), postUsersUsername)
 	mux.HandleFunc(pat.Get("/users/me/username/"), getUsersUsername)
