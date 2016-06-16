@@ -422,7 +422,7 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 
 	var user SimpleUser
 	var c bool
-	id := pat.Param(ctx, "id")
+	id, _ := strconv.ParseInt(pat.Param(ctx, "id"), 10, 64)
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] == true {
@@ -433,7 +433,7 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 	checkErr(err)
 	var dob []uint8
 	smt.QueryRow(id).Scan(&user.UserName, &dob)
-	user.Id, _ = strconv.ParseInt(id, 10, 64)
+	user.Id = id
 	user.Bod = transformAge(dob)
 	if c == false {
 		renderTemplate(w, "publicProfile", &publicProfileView{
@@ -442,6 +442,7 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 				Stylesheet: []string{"publicProfile.css"}},
 			Connection: false,
 			Profile:    user})
+		visitedProfile("unknown", id)
 	} else {
 		renderTemplate(w, "publicProfile", &publicProfileView{
 			Header: HeadData{
@@ -450,8 +451,9 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 			Connection: true,
 			User:       session.Values["UserInfo"].(UserData),
 			Profile:    user})
-
+		visitedProfile(session.Values["UserInfo"].(UserData).UserName, id)
 	}
+
 }
 
 func likeAnUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {

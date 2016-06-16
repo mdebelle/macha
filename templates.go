@@ -18,6 +18,14 @@ type SimpleUser struct {
 	UserName string
 }
 
+type Notifications struct {
+	Id     int64
+	Msg    string
+	Read   bool
+	Date   []uint8
+	UserId int64
+}
+
 type UserData struct {
 	Id          int
 	UserName    string
@@ -31,6 +39,7 @@ type UserData struct {
 	Popularity  sql.NullInt64
 	Interests   []Interest
 	Matches     []SimpleUser
+	Notifs      []Notifications
 }
 
 type HomeView struct {
