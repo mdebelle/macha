@@ -70,7 +70,7 @@ func initdatabase() {
 		"PRIMARY KEY (`id`))")
 	checkErr(err)
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `notification` ( " +
-		"`id` int(11) NOT NULL, " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`message` text, " +
 		"`date` date NOT NULL, " +
 		"`read` tinyint(1) NOT NULL DEFAULT '0', " +

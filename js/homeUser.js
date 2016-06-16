@@ -74,7 +74,6 @@
 			type:	'GET',
 			success: function(data) {
 				if (data) {
-					console.log(data.Status)
 					$('#changeusername input[type="text"]').val(data.Status)
 				} else {
 					console.log("What");
@@ -115,7 +114,6 @@
 			type:	'GET',
 			success: function(data) {
 				if (data) {
-					console.log(data.Status)
 					$('#changeuFirstname input[type="text"]').val(data.Status)
 				} else {
 					console.log("What");
@@ -158,7 +156,6 @@
 			type:	'GET',
 			success: function(data) {
 				if (data) {
-					console.log(data.Status)
 					$('#changeuLastname input[type="text"]').val(data.Status)
 				} else {
 					console.log("What");
@@ -201,7 +198,6 @@
 			type:	'GET',
 			success: function(data) {
 				if (data) {
-					console.log(data.Status)
 					$('#changebirthdate input[type="date"]').val(data.Status)
 				} else {
 					console.log("quel age ??");
@@ -242,11 +238,28 @@
 			success: function(data) {
 				if (data) {
 					$.each(data, function(index, value){
-						console.log(value);
 						$('#matches').append('<li class="matche"><a href="users/' + value.Id + '">' + value.UserName + ' | ' + value.Bod + ' ans</a></li>');
 					})
 				} else {
-					console.log("ne s'interesse a rien pour le moment")
+					console.log("ne s'interesse a rien pour le moment");
+				}
+			},
+			error: function(xhr,status,error) {
+				console.log(error);
+			}
+		});
+
+		//Recuperer les notifications
+		$.ajax({
+			url: '/notifications/',
+			type: 'GET',
+			success: function(data) {
+				if (data) {
+					$.each(data, function(index, value){
+						console.log(value);
+					})
+				} else {
+					console.log("pas de notifications");
 				}
 			},
 			error: function(xhr,status,error) {

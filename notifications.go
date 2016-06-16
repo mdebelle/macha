@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"goji.io/pat"
 	"golang.org/x/net/context"
 	"net/http"
@@ -25,7 +26,7 @@ func getNotifications(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	smt, err := database.Prepare("SELECT message=?, date=? FROM notification ORDER BY date DESC WHERE userid=?, read=?")
+	smt, err := database.Prepare("SELECT message, date FROM notification WHERE notification.userid=? AND notification.read=?")
 	checkErr(err)
 	defer smt.Close()
 	rows, err := smt.Query(session.Values["UserInfo"].(UserData).Id, false)
@@ -41,6 +42,7 @@ func getNotifications(w http.ResponseWriter, r *http.Request) {
 	}
 	err = rows.Err()
 	checkErr(err)
+	fmt.Println(">>>", notifs)
 	writeJson(w, notifs)
 }
 

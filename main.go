@@ -99,7 +99,7 @@ func main() {
 	mux.HandleFuncC(pat.Put("/users/:id/unlike/"), unlikeAnUser)
 	// Notifications
 	mux.HandleFuncC(pat.Put("/notifications/:id"), setReadNotifications)
-	mux.HandleFunc(pat.Get("/notifications"), getNotifications)
+	mux.HandleFunc(pat.Get("/notifications/"), getNotifications)
 
 	//Matches
 	mux.HandleFunc(pat.Get("/users/me/matches/"), getUsersMatches)
