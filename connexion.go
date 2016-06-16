@@ -15,9 +15,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] == true {
 		v.Header = HeadData{
 
-
-			Title:      "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
-
+			Title: "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
 
 			Stylesheet: []string{"homeUser.css"},
 			Scripts:    []string{"homeUser.js"}}

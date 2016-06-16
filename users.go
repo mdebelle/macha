@@ -129,50 +129,6 @@ func getUserInterestsList(userid int) []Interest {
 	return interests
 }
 
-// func putUsers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func deleteUsers(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-// }
-
-// func putUsersSexe(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersOrientation(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersBio(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersFirstname(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersLastname(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersMail(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
-// func putUsersPassword(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	id := pat.Param(ctx, "id")
-
-// }
-
 func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	var interest Interest
@@ -460,4 +416,54 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJson(w, users)
+}
+
+func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	var user SimpleUser
+	var c bool
+	id := pat.Param(ctx, "id")
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] == true {
+		c = true
+	}
+
+	smt, err := database.Prepare("SELECT user.username, user.birthdate FROM user WHERE id=?")
+	checkErr(err)
+	var dob []uint8
+	smt.QueryRow(id).Scan(&user.UserName, &dob)
+	user.Id, _ = strconv.ParseInt(id, 10, 64)
+	user.Bod = transformAge(dob)
+	if c == false {
+		renderTemplate(w, "publicProfile", &publicProfileView{
+			Header: HeadData{
+				Title:      "Profile",
+				Stylesheet: []string{"publicProfile.css"}},
+			Connection: false,
+			Profile:    user})
+	} else {
+		renderTemplate(w, "publicProfile", &publicProfileView{
+			Header: HeadData{
+				Title:      "Profile",
+				Stylesheet: []string{"publicProfile.css"}},
+			Connection: true,
+			User:       session.Values["UserInfo"].(UserData),
+			Profile:    user})
+
+	}
+}
+
+func likeAnUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	profileid := pat.Param(ctx, "id")
+	fmt.Println(profileid)
+
+}
+
+func unlikeAnUser(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	profileid := pat.Param(ctx, "id")
+	fmt.Println(profileid)
+
 }

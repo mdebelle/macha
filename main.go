@@ -7,10 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
-	"golang.org/x/net/context"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -47,40 +45,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 			Stylesheet: []string{"home.css"}}})
 }
 
-func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-
-	var user SimpleUser
-	var c bool
-	id := pat.Param(ctx, "id")
-
-	session, _ := store.Get(r, "session")
-	if session.Values["connected"] == true {
-		c = true
-	}
-
-	smt, err := database.Prepare("SELECT user.username, user.birthdate FROM user WHERE id=?")
-	checkErr(err)
-	smt.QueryRow(id).Scan(&user.UserName, &user.Bod)
-	user.Id, _ = strconv.ParseInt(id, 10, 64)
-	if c == false {
-		renderTemplate(w, "publicProfile", &publicProfileView{
-			Header: HeadData{
-				Title:      "Profile",
-				Stylesheet: []string{"publicProfile.css"}},
-			Connection: false,
-			Profile:    user})
-	} else {
-		renderTemplate(w, "publicProfile", &publicProfileView{
-			Header: HeadData{
-				Title:      "Profile",
-				Stylesheet: []string{"publicProfile.css"}},
-			Connection: true,
-			User:       session.Values["UserInfo"].(UserData),
-			Profile:    user})
-
-	}
-}
-
 func inscription(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "inscription", &inscriptionVew{
 		Header: HeadData{
@@ -102,67 +66,45 @@ func main() {
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Get("/"), home)
-	mux.HandleFunc(pat.Get("/inscription"), inscription)
 
+	// Creation d'un compte
+	mux.HandleFunc(pat.Get("/inscription"), inscription)
+	mux.HandleFunc(pat.Post("/users"), postUsers)
+
+	// Connexion Deconnexion utilisateur
 	mux.HandleFunc(pat.Post("/login"), login)
 	mux.HandleFunc(pat.Get("/logout"), logout)
-
 	mux.HandleFunc(pat.Get("/me"), connectedUser)
-
-	mux.HandleFunc(pat.Post("/users"), postUsers)
-	mux.HandleFunc(pat.Get("/users"), getUsers)
-	mux.HandleFuncC(pat.Get("/users/:id"), publicProfile)
-
-	// mux.HandleFuncC(pat.Put("/users/:id"), putUsers)
-	// mux.HandleFuncC(pat.Delete("/users/:id"), deleteUsers)
-
-	// mux.HandleFuncC(pat.Put("/users/me/sexe/"), putUsersSexe)
-	// mux.HandleFuncC(pat.Put("/users/me/orientation/"), putUsersOrientation)
-	// mux.HandleFuncC(pat.Put("/users/me/bio"), putUsersBio)
-	// mux.HandleFuncC(pat.Put("/users/me/firstname"), putUsersFirstname)
-	// mux.HandleFuncC(pat.Put("/users/me/lastname"), putUsersLastname)
-	// mux.HandleFuncC(pat.Put("/users/me/mail"), putUsersMail)
-	// mux.HandleFuncC(pat.Put("/users/me/password"), putUsersPassword)
 
 	// User's interests Road
 	mux.HandleFunc(pat.Post("/users/me/interests/"), postUsersInterests)
 	mux.HandleFunc(pat.Get("/users/me/interests/"), getUsersInterests)
 	mux.HandleFuncC(pat.Delete("/users/me/interests/:interestid"), deleteUsersInterests)
-
 	// User's age Road
 	mux.HandleFunc(pat.Put("/users/me/age/"), postUsersAge)
 	mux.HandleFunc(pat.Get("/users/me/age/"), getUsersAge)
-
 	// User's username Road
 	mux.HandleFunc(pat.Put("/users/me/username/"), postUsersUsername)
 	mux.HandleFunc(pat.Get("/users/me/username/"), getUsersUsername)
-
 	// User's firstname Road
 	mux.HandleFunc(pat.Put("/users/me/firstname/"), postUsersFirstName)
 	mux.HandleFunc(pat.Get("/users/me/firstname/"), getUsersFirstName)
-
 	// User's lastname Road
 	mux.HandleFunc(pat.Put("/users/me/lastname/"), postUsersLastName)
 	mux.HandleFunc(pat.Get("/users/me/lastname/"), getUsersLastName)
 
+	// Public Profile
+	mux.HandleFuncC(pat.Get("/users/:id"), publicProfile)
+	mux.HandleFuncC(pat.Put("/users/:id/like/"), likeAnUser)
+	mux.HandleFuncC(pat.Put("/users/:id/unlike/"), unlikeAnUser)
+
+	//Matches
 	mux.HandleFunc(pat.Get("/users/me/matches/"), getUsersMatches)
 
-	// // User's images Road
-	// mux.HandleFuncC(pat.Post("/users/:id/images/"), postUsersImages)
-	// mux.HandleFuncC(pat.Put("/users/:id/images/:idimage"), putUsersImageProfile)
-	// mux.HandleFuncC(pat.Delete("/users/:id/images/:idimage"), deleteUsersImages)
-
-	// // Interests
+	// Interests
 	mux.HandleFunc(pat.Post("/interests/"), postInterests)
-	// mux.HandleFunc(pat.Get("/interests/"), getInterests)
-	// mux.HandleFuncC(pat.Delete("/interests/:id"), deleteInterests)
 
-	// // Search
-	// mux.HandleFuncC(pat.Get("search/interests/:id/Users"), getInterestsUsers)
-	// mux.HandleFuncC(pat.Get("search/sex/:id/Users"), getSexUsers)
-	// mux.HandleFuncC(pat.Get("search/orientation/:id/Users"), getOrientationUsers)
-	// mux.HandleFuncC(pat.Get("search/sexe/:sexeid/orientation/:orientationid/Users"), getSexeOrientationUsers)
-
+	// Static Files
 	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)
 	mux.HandleFunc(pat.Get("/js/*"), staticJsFiles)
 
