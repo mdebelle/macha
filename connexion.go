@@ -1,10 +1,14 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
-	"net"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
+
+var errorWrong = errors.New("Wrong Password")
 
 func connectedUser(w http.ResponseWriter, r *http.Request) {
 
@@ -27,21 +31,48 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "homeUser", &v)
 }
 
+func checkLoginUser(username string, password []byte) (UserData, error) {
+
+	var user UserData
+	var spassword []byte
+
+	err := database.QueryRow("SELECT id, Firstname, Lastname, BirthDate, Email, Bio, Sexe, Orientation, Popularity, password FROM user WHERE username=?", username).Scan(
+		&user.Id, &user.FirstName, &user.LastName, &user.BirthDate, &user.Email, &user.Bio, &user.Sexe, &user.Orientation, &user.Popularity, &spassword)
+	switch {
+	case err == sql.ErrNoRows:
+		return user, sql.ErrNoRows
+	case err != nil:
+		return user, err
+	}
+	if bcrypt.CompareHashAndPassword(spassword, password) != nil {
+		return user, errorWrong
+	}
+	user.UserName = username
+	return user, nil
+}
+
 func login(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	fmt.Println(session)
 	if session.Values["connected"] == true {
+		fmt.Println("dejaconnecte")
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
 	}
 
-	ip, _, err := net.SplitHostPort(r.RemoteAddr)
-	userIP := net.ParseIP(ip)
-	fmt.Println(userIP)
-
 	user, err := checkLoginUser(r.FormValue("username"), []byte(r.FormValue("password")))
+	fmt.Println(err)
+	switch {
+	case err == sql.ErrNoRows:
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	case err == errorWrong:
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	checkErr(err)
+
 	session.Values["connected"] = true
 	session.Values["UserInfo"] = user
 	session.Save(r, w)

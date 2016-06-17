@@ -1,12 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"goji.io/pat"
-	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
@@ -35,26 +32,6 @@ func testEq(a, b []byte) bool {
 	}
 
 	return true
-}
-
-func checkLoginUser(username string, password []byte) (UserData, error) {
-
-	var user UserData
-	var spassword []byte
-
-	err := database.QueryRow("SELECT id, Firstname, Lastname, BirthDate, Email, Bio, Sexe, Orientation, Popularity, password FROM user WHERE username=?", username).Scan(
-		&user.Id, &user.FirstName, &user.LastName, &user.BirthDate, &user.Email, &user.Bio, &user.Sexe, &user.Orientation, &user.Popularity, &spassword)
-	switch {
-	case err == sql.ErrNoRows:
-		return user, errors.New("empty")
-	case err != nil:
-		return user, err
-	}
-	if bcrypt.CompareHashAndPassword(spassword, password) != nil {
-		return user, errors.New("wrong Password")
-	}
-	user.UserName = username
-	return user, nil
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
