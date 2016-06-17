@@ -28,6 +28,12 @@
 				<p class="formField"> <span class="label-user">Date de naissance</span> <input class="input-user" type="date" name="birth"/> <input class="btn-user" type="submit" value="Changer"/> </p>
 			</form>
 
+			<form id="changebio" action="#" method="PUT">
+				<p class="formArea">Petite Présentation</p>
+				<textarea class="area-user" name="bio">{{if eq .User.Bio.Valid true}} {{.User.Bio.String}} {{end}}</textarea>
+				<input class="btn-user" type="submit" value="Changer"/>
+			</form>
+
 			<form id="addinterest" action="#" method="POST">
 				<p class="formField"> <span class="label-user">Centre d'interets</span> <input class="input-user" type="text" name="label" maxlength="25"/> <input class="btn-user" type="submit" value="Ajouter"/> </p>
 			</form>

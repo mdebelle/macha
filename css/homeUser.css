@@ -46,7 +46,15 @@ a.logout {
 	font-size: 30px;
 	display: inline-flex;
 }
-
+.formArea {
+    width: 100%;
+    background: #03c9a9;
+    font-size: 30px;
+    padding-top: 20px;
+    padding-bottom: 19px;
+    text-align: center;
+    margin-bottom: 0;
+}
 .formField .input-user{
 	background-color: #ECF0F1;
 	width: 45%;

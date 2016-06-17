@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -20,7 +21,9 @@ func inscription(w http.ResponseWriter, r *http.Request) {
 	var iform InscriptionForm
 	session, err := store.Get(r, "session")
 	if err == nil {
-		iform = session.Values["iForm"].(InscriptionForm)
+		if session.Values["iForm"] != nil {
+			iform = session.Values["iForm"].(InscriptionForm)
+		}
 	}
 
 	fmt.Println(iform)
@@ -35,7 +38,7 @@ func inscription(w http.ResponseWriter, r *http.Request) {
 func checkeAlreadyExistingUsers(UserName, Email string) (string, bool) {
 
 	var msg = ""
-	var countuser, countmail int
+	var countuser, countmail sql.NullInt64
 	smt, err := database.Prepare("SELECT " +
 		"SUM(CASE WHEN username=? THEN 1 ELSE 0 END) countuser, " +
 		"SUM(CASE WHEN email=? THEN 1 ELSE 0 END) countmail " +
@@ -46,14 +49,14 @@ func checkeAlreadyExistingUsers(UserName, Email string) (string, bool) {
 	err = smt.QueryRow(UserName, Email).Scan(&countuser, &countmail)
 	checkErr(err)
 
-	if countuser > 0 {
+	if countuser.Valid && countuser.Int64 > 0 {
 		msg += "User already Exist "
 	}
-	if countmail > 0 {
+	if countmail.Valid && countmail.Int64 > 0 {
 		msg += "Account already Created with this email "
 	}
 
-	return msg, countuser+countmail > 0
+	return msg, countuser.Int64+countuser.Int64 > 0
 }
 
 func postUsers(w http.ResponseWriter, r *http.Request) {

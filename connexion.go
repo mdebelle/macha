@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
