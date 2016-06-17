@@ -18,9 +18,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 
 	if session.Values["connected"] == true {
 		v.Header = HeadData{
-
-			Title: "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
-
+			Title:      "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
 			Stylesheet: []string{"homeUser.css"},
 			Scripts:    []string{"homeUser.js"}}
 		v.User, _ = session.Values["UserInfo"].(UserData)
@@ -54,15 +52,12 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 func login(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
-	fmt.Println(session)
 	if session.Values["connected"] == true {
-		fmt.Println("dejaconnecte")
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
 	}
 
 	user, err := checkLoginUser(r.FormValue("username"), []byte(r.FormValue("password")))
-	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
 		http.Redirect(w, r, "/", http.StatusFound)
