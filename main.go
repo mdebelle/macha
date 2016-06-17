@@ -45,13 +45,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 			Stylesheet: []string{"home.css"}}})
 }
 
-func inscription(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "inscription", &inscriptionVew{
-		Header: HeadData{
-			Title:      "Inscription",
-			Stylesheet: []string{"inscription.css"}}})
-}
-
 func main() {
 
 	fmt.Println("localhost:4242")
@@ -62,6 +55,7 @@ func main() {
 	defer database.Close()
 
 	gob.Register(UserData{})
+	gob.Register(InscriptionForm{})
 
 	mux := goji.NewMux()
 

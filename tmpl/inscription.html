@@ -9,20 +9,27 @@
 <body>
 
 	<div class="container">
+
+		{{if eq .IForm.Error true }}
+			<div class="error">
+				<p>{{.IForm.ErrorMessage}}</p>
+			</div>
+		{{end}}
+
 		<div class="separator"></div>
 		<div class="connection">
 			<form action="/users" method="POST">
 				<div class="formField">
-					<input type="text" name="username" placeholder="username">
+					<input type="text" name="username" placeholder="username" value="{{.IForm.UserName}}">
 				</div>
 				<div class="formField">
-					<input type="text" name="firstname" placeholder="firstname">
+					<input type="text" name="firstname" placeholder="firstname" value="{{.IForm.FirstName}}">
 				</div>
 				<div class="formField">
-					<input type="text" name="lastname" placeholder="lastname">
+					<input type="text" name="lastname" placeholder="lastname" value="{{.IForm.LastName}}">
 				</div>
 				<div class="formField">
-					<input type="text" name="email" placeholder="email">
+					<input type="text" name="email" placeholder="email" value="{{.IForm.Email}}">
 				</div>
 				<div class="formField">
 					<input type="password" name="password" placeholder="password">

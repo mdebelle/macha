@@ -65,6 +65,7 @@ type publicProfileView struct {
 
 type inscriptionVew struct {
 	Header HeadData
+	IForm  InscriptionForm
 }
 
 var templates = template.Must(template.ParseFiles(

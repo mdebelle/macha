@@ -57,26 +57,6 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 	return user, nil
 }
 
-func postUsers(w http.ResponseWriter, r *http.Request) {
-
-	p, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
-	checkErr(err)
-
-	var user = User{
-		Username:  r.FormValue("username"),
-		Firstname: r.FormValue("firstname"),
-		Lastname:  r.FormValue("lastname"),
-		Email:     r.FormValue("email"),
-		Password:  p}
-
-	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")
-	checkErr(err)
-	defer smt.Close()
-	_, err = smt.Exec(user.Username, user.Firstname, user.Lastname, user.Email, user.Password)
-	checkErr(err)
-	http.Redirect(w, r, "/", http.StatusFound)
-}
-
 func getUsers(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
