@@ -50,6 +50,7 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 	smt, err := database.Prepare("SELECT date FROM last_connexion WHERE userid=? ORDER BY date DESC ")
 	checkErr(err)
 	err = smt.QueryRow(user.Id).Scan(&d)
+	user.LastConnexion = string(d)
 	user.UserName = username
 	return user, nil
 }
