@@ -5,6 +5,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
 var errorWrong = errors.New("Wrong Password")
@@ -44,6 +45,11 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 	if bcrypt.CompareHashAndPassword(spassword, password) != nil {
 		return user, errorWrong
 	}
+
+	var d []uint8
+	smt, err := database.Prepare("SELECT date FROM last_connexion WHERE userid=? ORDER BY date DESC ")
+	checkErr(err)
+	err = smt.QueryRow(user.Id).Scan(&d)
 	user.UserName = username
 	return user, nil
 }
@@ -67,6 +73,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 	checkErr(err)
 
+	t := time.Now()
+	smt, err := database.Prepare("INSERT last_connexion SET date=?, userid=?")
+	checkErr(err)
+	_, err = smt.Exec(t, user.Id)
+	checkErr(err)
 	session.Values["connected"] = true
 	session.Values["UserInfo"] = user
 	session.Save(r, w)

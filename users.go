@@ -344,6 +344,39 @@ func getUsersLastName(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).LastName})
 }
 
+func uptdateUsersBio(w http.ResponseWriter, r *http.Request) {
+
+	var data PostAge
+
+	fmt.Println("lololo")
+
+	session, _ := store.Get(r, "session")
+	if session.Values["connected"] != true {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
+	checkErr(err)
+	r.Body.Close()
+	err = json.Unmarshal(body, &data)
+	checkErr(err)
+
+	smt, err := database.Prepare("UPDATE user SET user.Bio=? WHERE id=?")
+	checkErr(err)
+	defer smt.Close()
+	fmt.Println(data.Date)
+	_, err = smt.Exec(data.Date, session.Values["UserInfo"].(UserData).Id)
+	checkErr(err)
+
+	var u = session.Values["UserInfo"].(UserData)
+	u.Bio.String = data.Date
+	session.Values["UserInfo"] = u
+	session.Save(r, w)
+
+	writeJson(w, ResponseStatus{Status: "ok"})
+}
+
 func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")

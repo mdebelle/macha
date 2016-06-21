@@ -32,7 +32,7 @@ type Image struct {
 var database *sql.DB
 
 func initdatabase() {
-	db, err := sql.Open("mysql", "root:root@tcp(localhost:3307)/machadb?charset=utf8")
+	db, err := sql.Open("mysql", DB_CONNECTION)
 	//  DEFAULT CHARACTER SET utf8
 	//  DEFAULT COLLATE utf8_general_ci
 	//
@@ -76,5 +76,12 @@ func initdatabase() {
 		"`read` tinyint(1) NOT NULL DEFAULT '0', " +
 		"`userid` int(11) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
+	checkErr(err)
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `last_connexion` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`date` datetime DEFAULT NULL, " +
+		"`userid` int(11) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
+	checkErr(err)
 	database = db
 }

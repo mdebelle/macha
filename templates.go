@@ -27,19 +27,20 @@ type Notifications struct {
 }
 
 type UserData struct {
-	Id          int
-	UserName    string
-	FirstName   string
-	LastName    string
-	BirthDate   []uint8
-	Email       string
-	Bio         sql.NullString
-	Sexe        sql.NullInt64
-	Orientation sql.NullInt64
-	Popularity  sql.NullInt64
-	Interests   []Interest
-	Matches     []SimpleUser
-	Notifs      []Notifications
+	Id            int
+	UserName      string
+	FirstName     string
+	LastName      string
+	BirthDate     []uint8
+	Email         string
+	Bio           sql.NullString
+	Sexe          sql.NullInt64
+	Orientation   sql.NullInt64
+	Popularity    sql.NullInt64
+	Interests     []Interest
+	Matches       []SimpleUser
+	Notifs        []Notifications
+	LastConnexion string
 }
 
 type HomeView struct {

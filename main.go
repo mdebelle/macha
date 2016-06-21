@@ -86,6 +86,8 @@ func main() {
 	// User's lastname Road
 	mux.HandleFunc(pat.Put("/users/me/lastname/"), postUsersLastName)
 	mux.HandleFunc(pat.Get("/users/me/lastname/"), getUsersLastName)
+	// User's Bio Road
+	mux.HandleFunc(pat.Put("/users/me/bio/"), uptdateUsersBio)
 
 	// Public Profile
 	mux.HandleFuncC(pat.Get("/users/:id"), publicProfile)

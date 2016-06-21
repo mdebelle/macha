@@ -231,6 +231,33 @@
 			})
 		});
 
+		// changer la biographie de quelqu'un
+		$('#changebio').on('submit', function(e){
+			e.preventDefault();
+			var content = $('#changebio textarea').val();
+			console.log(content)
+			$.ajax({
+				url:			apiUrl + 'bio/',
+				type:			'PUT',
+				data:			JSON.stringify({Date:content}),
+				contentType:	'application/json',
+				dataType:		'json',
+				success:		function(data) {
+					if (data.Status == 'ok') {
+						console.log('updated')
+						$('#changebio textarea').empty();
+						$('#changebio textarea').append(content);
+					} else {
+						console.log("something wrong happen about bio");
+					}
+				},
+				error: function(xhr,status,error) {
+					console.log(error);
+				}
+			})
+		});
+
+
 		//Trouver des utilisateurs
 		$.ajax({
 			url:	apiUrl + 'matches/',
@@ -256,7 +283,7 @@
 			success: function(data) {
 				if (data) {
 					$.each(data, function(index, value){
-						console.log(value);
+						// console.log(value);
 					})
 				} else {
 					console.log("pas de notifications");
