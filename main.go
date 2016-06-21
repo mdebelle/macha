@@ -38,6 +38,17 @@ func transformAge(dob []uint8) int {
 	return tnow.Year() - t.Year()
 }
 
+func convertLastCo(d []uint8) string {
+
+	const layouttime = "2006-01-02 15:04:05"
+	fmt.Println("before", string(d))
+	t, _ := time.Parse(layouttime, string(d))
+	tf := t.Add(time.Hour * 2)
+	str := tf.Format(layouttime)
+	fmt.Println("after", str)
+	return str
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
