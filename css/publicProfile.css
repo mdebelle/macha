@@ -1,0 +1,36 @@
+* {
+	box-sizing: border-box;
+}
+
+body{
+	background-color: #26A65B;
+}
+
+.userTitle {
+	font-size: 30px;
+	text-transform: capitalize;
+	font-family: sans-serif;
+}
+a.logout {
+	text-decoration: none;
+	color: #ECF0F1;
+}
+
+.notification {
+	text-align: center;
+    background: #ECF0F1;
+    display: inline-block;
+    color: #6C7A89;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.poppower {
+	text-align: center;
+    background: #ECF0F1;
+    display: inline-block;
+    color: #6C7A89;
+    border-radius: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}

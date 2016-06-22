@@ -3,7 +3,7 @@
 	<head>
 		<title>{{.Header.Title}} | Matcha</title>
 		{{ range $key, $val := .Header.Stylesheet }}
-			<link rel="stylesheet" media="all" href="css/{{$val}}">
+			<link rel="stylesheet" media="all" href="/css/{{$val}}">
 		{{ end }}
 		<script type="text/javascript"  src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 	</head>
