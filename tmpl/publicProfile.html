@@ -16,6 +16,9 @@
 		<div class="container">
 			<p>C'est {{ .Profile.UserName }} agé de {{ .Profile.Bod }} ans</p>
 
+
+			<p>{{.Profile.Bio}}</p>
+
 			{{ if eq .Connection true }}
 				<p id="likeState"></p>
 			{{ end }}

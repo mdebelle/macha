@@ -61,6 +61,8 @@ func main() {
 	gob.Register(UserData{})
 	gob.Register(InscriptionForm{})
 
+	go hub.run()
+
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Get("/"), home)
@@ -107,10 +109,15 @@ func main() {
 	// Interests
 	mux.HandleFunc(pat.Post("/interests/"), postInterests)
 
+	// Chat
+
+	mux.HandleFunc(pat.Get("/me/chat"), chat)
+	mux.HandleFunc(pat.Get("/me/chat/ws"), serveWs)
+
 	// Static Files
 	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)
 	mux.HandleFunc(pat.Get("/js/*"), staticJsFiles)
 
-	log.Fatal(http.ListenAndServe(":4242", mux))
+	log.Fatal(http.ListenAndServe(LISTEN_PORT, mux))
 
 }

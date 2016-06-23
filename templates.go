@@ -16,6 +16,7 @@ type SimpleUser struct {
 	Id       int64
 	Bod      int
 	UserName string
+	Bio      string
 }
 
 type Notifications struct {
@@ -69,11 +70,17 @@ type inscriptionVew struct {
 	IForm  InscriptionForm
 }
 
+type chatVew struct {
+	Header HeadData
+	Host   string
+}
+
 var templates = template.Must(template.ParseFiles(
 	TEMPLATE_DIRECTORY+"home.html",
 	TEMPLATE_DIRECTORY+"homeUser.html",
 	TEMPLATE_DIRECTORY+"publicProfile.html",
 	TEMPLATE_DIRECTORY+"inscription.html",
+	TEMPLATE_DIRECTORY+"chat.html",
 	TEMPLATE_DIRECTORY+"users.html"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, v interface{}) {
