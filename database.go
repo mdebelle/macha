@@ -33,28 +33,26 @@ var database *sql.DB
 
 func initdatabase() {
 	db, err := sql.Open("mysql", DB_CONNECTION)
-	//  DEFAULT CHARACTER SET utf8
-	//  DEFAULT COLLATE utf8_general_ci
-	//
-	checkErr(err)
+	checkErr(err, "database")
+
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `image` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`label` varchar(250) NOT NULL, " +
 		"`description` longtext NOT NULL, " +
 		"`userid` int(11) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
-	checkErr(err)
+	checkErr(err, "database")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `interest` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`label` varchar(40) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
-	checkErr(err)
+	checkErr(err, "database")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `userinterest` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`interestid` int(11) NOT NULL, " +
 		"`userid` int(11) NOT NULL, " +
 		"PRIMARY KEY (`id`), UNIQUE KEY `idunik` (`interestid`,`userid`))")
-	checkErr(err)
+	checkErr(err, "database")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`username` varchar(40) NOT NULL, " +
@@ -68,7 +66,7 @@ func initdatabase() {
 		"`bio` longtext DEFAULT NULL, " +
 		"`popularity` int(11) DEFAULT NULL, " +
 		"PRIMARY KEY (`id`))")
-	checkErr(err)
+	checkErr(err, "database")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `notification` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`message` text, " +
@@ -76,12 +74,12 @@ func initdatabase() {
 		"`read` tinyint(1) NOT NULL DEFAULT '0', " +
 		"`userid` int(11) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
-	checkErr(err)
+	checkErr(err, "database")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `last_connexion` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`date` datetime DEFAULT NULL, " +
 		"`userid` int(11) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
-	checkErr(err)
+	checkErr(err, "database")
 	database = db
 }

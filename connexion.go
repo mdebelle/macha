@@ -13,7 +13,7 @@ var errorWrong = errors.New("Wrong Password")
 func connectedUser(w http.ResponseWriter, r *http.Request) {
 
 	session, err := store.Get(r, "session")
-	checkErr(err)
+	checkErr(err, "connectedUser")
 	var v homeUserView
 
 	if session.Values["connected"] == true {
@@ -48,7 +48,7 @@ func checkLoginUser(username string, password []byte) (UserData, error) {
 
 	var d []uint8
 	smt, err := database.Prepare("SELECT date FROM last_connexion WHERE userid=? ORDER BY date DESC ")
-	checkErr(err)
+	checkErr(err, "checkLoginUser")
 	err = smt.QueryRow(user.Id).Scan(&d)
 	user.LastConnexion = convertLastCo(d)
 	user.UserName = username
@@ -72,13 +72,13 @@ func login(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	checkErr(err)
+	checkErr(err, "login")
 
 	t := time.Now()
 	smt, err := database.Prepare("INSERT last_connexion SET date=?, userid=?")
-	checkErr(err)
+	checkErr(err, "login")
 	_, err = smt.Exec(t, user.Id)
-	checkErr(err)
+	checkErr(err, "login")
 	session.Values["connected"] = true
 	session.Values["UserInfo"] = user
 	session.Save(r, w)

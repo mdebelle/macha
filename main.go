@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
@@ -16,40 +15,35 @@ type ResponseStatus struct {
 	Status string
 }
 
+func checkErr(err error, name string) {
+	if err != nil {
+		log.Println("-- ERROR --", name)
+		panic(err)
+	}
+}
+
 func writeJson(w http.ResponseWriter, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode(v)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
+	checkErr(err, "writeJson")
 }
 
 func transformAge(dob []uint8) int {
 	const layouttime = "2006-01-02"
-	tnow := time.Now()
+	tnow := time.Now().Year()
 	t, _ := time.Parse(layouttime, string(dob))
-	return tnow.Year() - t.Year()
+	return tnow - t.Year()
 }
 
 func convertLastCo(d []uint8) string {
-
 	const layouttime = "2006-01-02 15:04:05"
-	fmt.Println("before", string(d))
 	t, _ := time.Parse(layouttime, string(d))
-	tf := t.Add(time.Hour * 2)
-	str := tf.Format(layouttime)
-	fmt.Println("after", str)
-	return str
+	return t.Add(time.Hour * 2).Format(layouttime)
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
+	log.Println(">>> page d'accueil")
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
 			Title:      "Homepage",
@@ -58,11 +52,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	fmt.Println("localhost:4242")
+	log.Println("localhost:4242")
 
 	// Connection a la base de donnee
 	initdatabase()
-	fmt.Println("Database Created")
 	defer database.Close()
 
 	gob.Register(UserData{})

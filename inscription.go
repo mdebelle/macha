@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
@@ -26,8 +25,6 @@ func inscription(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println(iform)
-
 	renderTemplate(w, "inscription", &inscriptionVew{
 		Header: HeadData{
 			Title:      "Inscription",
@@ -44,10 +41,10 @@ func checkeAlreadyExistingUsers(UserName, Email string) (string, bool) {
 		"SUM(CASE WHEN email=? THEN 1 ELSE 0 END) countmail " +
 		"FROM user")
 
-	checkErr(err)
+	checkErr(err, "checkeAlreadyExistingUsers")
 	defer smt.Close()
 	err = smt.QueryRow(UserName, Email).Scan(&countuser, &countmail)
-	checkErr(err)
+	checkErr(err, "checkeAlreadyExistingUsers")
 
 	if countuser.Valid && countuser.Int64 > 0 {
 		msg += "User already Exist "
@@ -68,7 +65,6 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 		Email:     r.FormValue("email")}
 
 	if iForm.ErrorMessage, iForm.Error = checkeAlreadyExistingUsers(iForm.UserName, iForm.Email); iForm.Error == true {
-		fmt.Println("User already exists", iForm)
 		session, _ := store.Get(r, "session")
 		session.Values["iForm"] = iForm
 		session.Save(r, w)
@@ -77,13 +73,13 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
-	checkErr(err)
+	checkErr(err, "postUsers")
 
 	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")
-	checkErr(err)
+	checkErr(err, "postUsers")
 	defer smt.Close()
 	_, err = smt.Exec(iForm.UserName, iForm.FirstName, iForm.LastName, iForm.Email, p)
-	checkErr(err)
+	checkErr(err, "postUsers")
 	session, _ := store.Get(r, "session")
 	session.Values["iForm"] = InscriptionForm{}
 	session.Save(r, w)

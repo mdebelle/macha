@@ -8,11 +8,11 @@ import (
 
 const sendmailcmd = "/usr/sbin/sendmail"
 
-func sendmail(email, body string) {
+func sendmail(email, object, body string) {
 
 	msg := "From: contact@macha.fr\n"
 	msg += "To: " + email + "\n"
-	msg += "Subject: Testing\n\n"
+	msg += "Subject: " + object + "\n\n"
 	msg += body
 	msg += ".\n"
 
@@ -21,16 +21,16 @@ func sendmail(email, body string) {
 	cmd.Stderr = os.Stderr
 
 	stdin, err := cmd.StdinPipe()
-	checkErr(err)
+	checkErr(err, "sendmail")
 
 	err = cmd.Start()
-	checkErr(err)
+	checkErr(err, "sendmail")
 
 	var errs [3]error
 	_, errs[0] = io.WriteString(stdin, msg)
 	errs[1] = stdin.Close()
 	errs[2] = cmd.Wait()
 	for _, err = range errs {
-		checkErr(err)
+		checkErr(err, "sendmail")
 	}
 }

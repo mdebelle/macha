@@ -43,10 +43,10 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	smt, err := database.Prepare("SELECT id, username, sexe, orientation, bio, popularite FROM user")
-	checkErr(err)
+	checkErr(err, "getUsers")
 	defer smt.Close()
 	rows, err := smt.Query()
-	checkErr(err)
+	checkErr(err, "getUsers")
 	defer rows.Close()
 
 	var users []UserData
@@ -54,12 +54,12 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		users = append(users, UserData{})
 		err := rows.Scan(&users[i].Id, &users[i].UserName, &users[i].Sexe, &users[i].Orientation, &users[i].Bio, &users[i].Popularity)
-		checkErr(err)
+		checkErr(err, "getUsers")
 		users[i].Interests = getUserInterestsList(users[i].Id)
 		i++
 	}
 	err = rows.Err()
-	checkErr(err)
+	checkErr(err, "getUsers")
 	renderTemplate(w, "users", &usersView{
 		Header: HeadData{
 			Title:      "Profile",
@@ -70,17 +70,17 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 func getUserInterestsList(userid int) []Interest {
 
 	smt, err := database.Prepare("SELECT interest.id interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
-	checkErr(err)
+	checkErr(err, "getUserInterestsList")
 	defer smt.Close()
 	rows, err := smt.Query(userid)
-	checkErr(err)
+	checkErr(err, "getUserInterestsList")
 
 	var interests []Interest
 	var i int
 	for rows.Next() {
 		interests = append(interests, Interest{})
 		err := rows.Scan(&interests[i].Id, &interests[i].Label)
-		checkErr(err)
+		checkErr(err, "getUserInterestsList")
 		i++
 	}
 	return interests
@@ -96,10 +96,10 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "postUsersInterests")
 	r.Body.Close()
 	err = json.Unmarshal(body, &interest)
-	checkErr(err)
+	checkErr(err, "postUsersInterests")
 
 	interest.Id = getInterestId(interest.Label, session.Values["UserInfo"].(UserData).Id)
 
@@ -119,21 +119,21 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
-	checkErr(err)
+	checkErr(err, "getUsersInterests")
 	defer smt.Close()
 	rows, err := smt.Query(session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "getUsersInterests")
 
 	var interests []Interest
 	var i int
 	for rows.Next() {
 		interests = append(interests, Interest{})
 		err := rows.Scan(&interests[i].Id, &interests[i].Label)
-		checkErr(err)
+		checkErr(err, "getUsersInterests")
 		i++
 	}
 	err = rows.Err()
-	checkErr(err)
+	checkErr(err, "getUsersInterests")
 	writeJson(w, interests)
 }
 
@@ -148,10 +148,10 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 	id := pat.Param(ctx, "interestid")
 
 	smt, err := database.Prepare("DELETE FROM userinterest WHERE interestid=? AND userid=?")
-	checkErr(err)
+	checkErr(err, "deleteUsersInterests")
 	defer smt.Close()
 	_, err = smt.Exec(id, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "deleteUsersInterests")
 	writeJson(w, ResponseStatus{Status: "ok"})
 
 }
@@ -171,24 +171,22 @@ func postUsersAge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "postUsersAge")
 	r.Body.Close()
 	err = json.Unmarshal(body, &date)
-	checkErr(err)
+	checkErr(err, "postUsersAge")
 
 	smt, err := database.Prepare("UPDATE user SET user.birthdate=? WHERE id=?")
-	checkErr(err)
+	checkErr(err, "postUsersAge")
 	defer smt.Close()
 	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "postUsersAge")
 
 	// Mettre a jours la session
 	var u = session.Values["UserInfo"].(UserData)
 
-	fmt.Println(u)
-
 	database.QueryRow("SELECT BirthDate FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.BirthDate)
-	checkErr(err)
+	checkErr(err, "postUsersAge")
 	session.Values["UserInfo"] = u
 	session.Save(r, w)
 
@@ -203,7 +201,6 @@ func getUsersAge(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	fmt.Println(session.Values["UserInfo"].(UserData))
 	writeJson(w, ResponseStatus{Status: string(session.Values["UserInfo"].(UserData).BirthDate)})
 }
 
@@ -218,24 +215,22 @@ func postUsersUsername(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "postUsersUsername")
 	r.Body.Close()
 	err = json.Unmarshal(body, &date)
-	checkErr(err)
+	checkErr(err, "postUsersUsername")
 
 	smt, err := database.Prepare("UPDATE user SET user.username=? WHERE id=?")
-	checkErr(err)
+	checkErr(err, "postUsersUsername")
 	defer smt.Close()
 	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "postUsersUsername")
 
 	// Mettre a jours la session
 	var u = session.Values["UserInfo"].(UserData)
 
-	fmt.Println(u)
-
 	database.QueryRow("SELECT UserName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.UserName)
-	checkErr(err)
+	checkErr(err, "postUsersUsername")
 	session.Values["UserInfo"] = u
 	session.Save(r, w)
 
@@ -250,7 +245,6 @@ func getUsersUsername(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	fmt.Println(session.Values["UserInfo"].(UserData))
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).UserName})
 }
 
@@ -265,24 +259,22 @@ func postUsersFirstName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "postUsersFirstName")
 	r.Body.Close()
 	err = json.Unmarshal(body, &date)
-	checkErr(err)
+	checkErr(err, "postUsersFirstName")
 
 	smt, err := database.Prepare("UPDATE user SET user.FirstName=? WHERE id=?")
-	checkErr(err)
+	checkErr(err, "postUsersFirstName")
 	defer smt.Close()
 	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "postUsersFirstName")
 
 	// Mettre a jours la session
 	var u = session.Values["UserInfo"].(UserData)
 
-	fmt.Println(u)
-
 	database.QueryRow("SELECT FirstName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.FirstName)
-	checkErr(err)
+	checkErr(err, "postUsersFirstName")
 	session.Values["UserInfo"] = u
 	session.Save(r, w)
 
@@ -297,7 +289,6 @@ func getUsersFirstName(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	fmt.Println(session.Values["UserInfo"].(UserData))
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).FirstName})
 }
 
@@ -312,16 +303,16 @@ func postUsersLastName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "postUsersLastName")
 	r.Body.Close()
 	err = json.Unmarshal(body, &date)
-	checkErr(err)
+	checkErr(err, "postUsersLastName")
 
 	smt, err := database.Prepare("UPDATE user SET user.LastName=? WHERE id=?")
-	checkErr(err)
+	checkErr(err, "postUsersLastName")
 	defer smt.Close()
 	_, err = smt.Exec(date.Date, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "postUsersLastName")
 
 	// Mettre a jours la session
 	var u = session.Values["UserInfo"].(UserData)
@@ -340,15 +331,12 @@ func getUsersLastName(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	fmt.Println(session.Values["UserInfo"].(UserData))
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).LastName})
 }
 
 func uptdateUsersBio(w http.ResponseWriter, r *http.Request) {
 
 	var data PostAge
-
-	fmt.Println("lololo")
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
@@ -357,17 +345,16 @@ func uptdateUsersBio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
-	checkErr(err)
+	checkErr(err, "uptdateUsersBio")
 	r.Body.Close()
 	err = json.Unmarshal(body, &data)
-	checkErr(err)
+	checkErr(err, "uptdateUsersBio")
 
 	smt, err := database.Prepare("UPDATE user SET user.Bio=? WHERE id=?")
-	checkErr(err)
+	checkErr(err, "uptdateUsersBio")
 	defer smt.Close()
-	fmt.Println(data.Date)
 	_, err = smt.Exec(data.Date, session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "uptdateUsersBio")
 
 	var u = session.Values["UserInfo"].(UserData)
 	u.Bio.String = data.Date
@@ -386,10 +373,10 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	smt, err := database.Prepare("SELECT id, Username, Birthdate FROM user WHERE id!=?")
-	checkErr(err)
+	checkErr(err, "getUsersMatches")
 	defer smt.Close()
 	rows, err := smt.Query(session.Values["UserInfo"].(UserData).Id)
-	checkErr(err)
+	checkErr(err, "getUsersMatches")
 
 	var users []SimpleUser
 	var i int
@@ -399,9 +386,9 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&users[i].Id, &users[i].UserName, &dob)
 		if dob != nil {
 			users[i].Bod = transformAge(dob)
-			checkErr(err)
+			checkErr(err, "getUsersMatches")
 		}
-		checkErr(err)
+		checkErr(err, "getUsersMatches")
 		i++
 	}
 
@@ -420,7 +407,7 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 	}
 
 	smt, err := database.Prepare("SELECT user.username, user.birthdate FROM user WHERE id=?")
-	checkErr(err)
+	checkErr(err, "publicProfile")
 	var dob []uint8
 	smt.QueryRow(id).Scan(&user.UserName, &dob)
 	user.Id = id
