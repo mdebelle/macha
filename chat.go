@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-// serveWs handles websocket requests from the peer.
 func serveWs(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -19,17 +18,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 }
 
 func chat(w http.ResponseWriter, r *http.Request) {
-	// if r.URL.Path != "/" {
-	// 	http.Error(w, "Not found", 404)
-	// 	return
-	// }
-	// if r.Method != "GET" {
-	// 	http.Error(w, "Method not allowed", 405)
-	// 	return
-	// }
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// homeTemplate.Execute(w, r.Host)
-
 	renderTemplate(w, "chat", &chatVew{
 		Header: HeadData{
 			Title:      "Chat",
