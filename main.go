@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"goji.io"
 	"goji.io/pat"
+	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
 	"time"
@@ -43,6 +44,7 @@ func convertLastCo(d []uint8) string {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
+
 	log.Println(">>> page d'accueil")
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
@@ -60,8 +62,6 @@ func main() {
 
 	gob.Register(UserData{})
 	gob.Register(InscriptionForm{})
-
-	go hub.run()
 
 	mux := goji.NewMux()
 
@@ -111,8 +111,8 @@ func main() {
 
 	// Chat
 
-	mux.HandleFunc(pat.Get("/me/chat"), chat)
-	mux.HandleFunc(pat.Get("/me/chat/ws"), serveWs)
+	mux.HandleFuncC(pat.Get("/me/chat/:id"), chat)
+	mux.Handle(pat.Get("/me/chat/ws"), websocket.Handler(serveWs))
 
 	// Static Files
 	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)

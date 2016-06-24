@@ -42,6 +42,7 @@ type UserData struct {
 	Matches       []SimpleUser
 	Notifs        []Notifications
 	LastConnexion string
+	ChatId        int
 }
 
 type HomeView struct {

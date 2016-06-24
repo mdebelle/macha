@@ -32,6 +32,7 @@ $(function () {
 
     if (window["WebSocket"]) {
         conn = new WebSocket("ws://{{.Host}}/ws");
+        console.log(conn);
         conn.onclose = function (evt) {
             appendLog($("<div><b>Connection closed.</b></div>"));
         };
