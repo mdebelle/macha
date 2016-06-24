@@ -49,11 +49,11 @@ func serveWs(ws *websocket.Conn) {
 
 		msg = session.Values["UserInfo"].(UserData).UserName + " : " + msg
 		for cs, _ := range ActiveClients {
-			if cs.userId == u.ChatId || cs.userId == u.Id {
-				if err = Message.Send(cs.websocket, msg); err != nil {
-					log.Println("Could not send message to ", cs.clientIP, err.Error())
-				}
+			// if cs.userId == u.ChatId || cs.userId == u.Id {
+			if err = Message.Send(cs.websocket, msg); err != nil {
+				log.Println("Could not send message to ", cs.clientIP, err.Error())
 			}
+			// }
 		}
 	}
 
@@ -68,6 +68,8 @@ func chat(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	u := session.Values["UserInfo"].(UserData)
 	id := pat.Param(ctx, "id")
 	u.ChatId, _ = strconv.Atoi(id)
@@ -79,6 +81,6 @@ func chat(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		Header: HeadData{
 			Title:      "Chat",
 			Stylesheet: []string{"chat.css"}},
-		Host: "localhost" + LISTEN_PORT + "/me/chat/"})
+		Host: "localhost" + LISTEN_PORT})
 
 }

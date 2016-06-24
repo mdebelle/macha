@@ -112,7 +112,7 @@ func main() {
 	// Chat
 
 	mux.HandleFuncC(pat.Get("/me/chat/:id"), chat)
-	mux.Handle(pat.Get("/me/chat/ws"), websocket.Handler(serveWs))
+	http.Handle("/ws", websocket.Handler(serveWs))
 
 	// Static Files
 	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)

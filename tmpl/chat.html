@@ -4,92 +4,82 @@
 <title>Chat Example</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script type="text/javascript">
-$(function () {
-    var conn;
-    var msg = $("#msg");
-    var log = $("#log");
-
-    function appendLog(msg) {
-        var d = log[0];
-        var doScroll = d.scrollTop === d.scrollHeight - d.clientHeight;
-        msg.appendTo(log);
-        if (doScroll) {
-            d.scrollTop = d.scrollHeight - d.clientHeight;
-        }
+    try {
+        var sock = new WebSocket("ws://{{.Host}}/ws");
+        //sock.binaryType = 'blob'; // can set it to 'blob' or 'arraybuffer 
+        console.log("Websocket - status: " + sock.readyState);
+        sock.onopen = function(m) { 
+            console.log("CONNECTION opened..." + this.readyState);}
+        sock.onmessage = function(m) { 
+            $('#chatbox').append('<p>' + m.data + '</p>');}
+        sock.onerror = function(m) {
+            console.log("Error occured sending..." + m.data);}
+        sock.onclose = function(m) { 
+            console.log("Disconnected - status " + this.readyState);}
+    } catch(exception) {
+        console.log(exception);
     }
-
-    $("#form").submit(function () {
-        if (!conn) {
-            return false;
-        }
-        if (!msg.val()) {
-            return false;
-        }
-        conn.send(msg.val());
-        msg.val("");
-        return false;
-    });
-
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://{{.Host}}/ws");
-        console.log(conn);
-        conn.onclose = function (evt) {
-            appendLog($("<div><b>Connection closed.</b></div>"));
-        };
-        conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n')
-            for (var i = 0; i < messages.length; i++) {
-                appendLog($("<div/>").text(messages[i]));
-            }
-        };
-    } else {
-        appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"));
-    }
-});
 </script>
 <style type="text/css">
-html {
-    overflow: hidden;
-}
+        html {
+            overflow: hidden;
+        }
 
-body {
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    background: gray;
-}
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
 
-#log {
-    background: white;
-    margin: 0;
-    padding: 0.5em 0.5em 0.5em 0.5em;
-    position: absolute;
-    top: 0.5em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 3em;
-    overflow: auto;
-}
+        #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        }
 
-#form {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
-    position: absolute;
-    bottom: 1em;
-    left: 0px;
-    width: 100%;
-    overflow: hidden;
-}
+        #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0px;
+            width: 100%;
+            overflow: hidden;
+        }
 
 </style>
 </head>
-<body>
-<div id="log"></div>
-<form id="form">
-    <input type="submit" value="Send" />
-    <input type="text" id="msg" size="64"/>
-</form>
-</body>
+    <body>
+        <h1> This chat is powered by web sockets </h1>
+        <div id ="text">
+        <textarea id="textin" cols="30" rows="4" placeholder="This is where you type..." autofocus>
+        </textarea>
+        <button id="send">Send Message</button>
+        </div>
+
+        <div id="chat-box-container">
+            <h2> This is the chatbox... </h2>
+            <div id="chatbox">
+                <p> Go Type stuff... </p>
+            </div>
+        </div>
+
+        <script>
+            $('#textin').val("");
+            // take what's the textbox and send it off
+            $('#send').click( function(event) {
+                sock.send($('#textin').val());
+                $('#textin').val("");
+            });
+        </script>
+    </body>
 </html>
