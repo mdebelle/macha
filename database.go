@@ -87,5 +87,24 @@ func initdatabase() {
 		"`chatname_two` varchar(80) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
 	checkErr(err, "database")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `message` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`chatid` varchar(80) NOT NULL, " +
+		"`msg` longtext NOT NULL, " +
+		"`date` varchar(80) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
+	checkErr(err, "database")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `closedroom` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`chatid` varchar(80) NOT NULL, " +
+		"`userid` varchar(80) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
+	checkErr(err, "database")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `blockeduser` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`baduserid` varchar(80) NOT NULL, " +
+		"`userid` varchar(80) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
+	checkErr(err, "database")
 	database = db
 }

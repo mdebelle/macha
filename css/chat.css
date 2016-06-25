@@ -1,0 +1,36 @@
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+body {
+	width:100%;
+	font-family: fantasy;
+	font-size: 13px;
+}
+
+h1 {
+	text-align: center;
+}
+
+#text {
+	position: relative;
+	left: 500px;
+	top: 20px;
+}
+
+#chat-box-container {
+	width: 600px;
+	height: 100%;
+	position: relative;
+	left: 500px;
+	top: 50px;
+}
+
+#chatbox {
+	position: relative;
+	right: 150px;
+	border-style: solid;
+	border-radius: 2px;
+	padding: 10px;
+}

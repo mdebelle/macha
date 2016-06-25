@@ -59,10 +59,9 @@ func SockServer(ws *websocket.Conn) {
 		}
 
 		clientMessage = sockCli.clientUsername + " Said: " + clientMessage
+		log.Println("clientMessage")
 		for cs, _ := range ActiveClients {
 			if u.ChatId == cs.chatId {
-				log.Println("match")
-
 				if err = Message.Send(cs.websocket, clientMessage); err != nil {
 					// we could not send the message to a peer
 					log.Println("Could not send message to ", cs.clientUsername, err.Error())
@@ -100,6 +99,10 @@ func RootHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	session.Values["UserInfo"] = u
 	session.Save(r, w)
 	log.Println("conneciton to chatroom", id)
-	renderTemplate(w, "chat", listenAddr)
-
+	renderTemplate(w, "chat", &chatVew{
+		Header: HeadData{
+			Title:      "ChatRoom",
+			Stylesheet: []string{"chat.css"},
+			Scripts:    []string{"chat.js"}},
+		Host: listenAddr})
 }
