@@ -24,6 +24,7 @@ type ClientConn struct {
 	websocket      *websocket.Conn
 	clientIP       string
 	clientUsername string
+	chatId         int
 }
 
 // WebSocket server to handle chat between clients
@@ -45,7 +46,7 @@ func SockServer(ws *websocket.Conn) {
 	var u = session.Values["UserInfo"].(UserData)
 
 	log.Println("Client connected:", r.RemoteAddr, u.UserName)
-	sockCli := ClientConn{ws, r.RemoteAddr, u.UserName}
+	sockCli := ClientConn{ws, r.RemoteAddr, u.UserName, u.ChatId}
 	ActiveClients[sockCli] = 0
 	log.Println("Number of clients connected ...", len(ActiveClients))
 
@@ -59,9 +60,13 @@ func SockServer(ws *websocket.Conn) {
 
 		clientMessage = sockCli.clientUsername + " Said: " + clientMessage
 		for cs, _ := range ActiveClients {
-			if err = Message.Send(cs.websocket, clientMessage); err != nil {
-				// we could not send the message to a peer
-				log.Println("Could not send message to ", cs.clientUsername, err.Error())
+			if u.ChatId == cs.chatId {
+				log.Println("match")
+
+				if err = Message.Send(cs.websocket, clientMessage); err != nil {
+					// we could not send the message to a peer
+					log.Println("Could not send message to ", cs.clientUsername, err.Error())
+				}
 			}
 		}
 	}
@@ -91,6 +96,9 @@ func RootHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/me", http.StatusFound)
 		return
 	}
+	u.ChatId = int(id)
+	session.Values["UserInfo"] = u
+	session.Save(r, w)
 	log.Println("conneciton to chatroom", id)
 	renderTemplate(w, "chat", listenAddr)
 
