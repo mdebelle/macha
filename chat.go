@@ -1,86 +1,97 @@
 package main
 
 import (
-	// "error"
 	"goji.io/pat"
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+)
+
+const (
+	listenAddr = "localhost" + LISTEN_PORT // server address
 )
 
 var (
-	ActiveClients = make(map[ClientConn]int)
-	Message       = websocket.Message
+	Message       = websocket.Message        // codec for string, []byte
+	ActiveClients = make(map[ClientConn]int) // map containing clients
 )
 
+// Client connection consists of the websocket and the client ip
 type ClientConn struct {
-	websocket *websocket.Conn
-	clientIP  string
-	userId    int
+	websocket      *websocket.Conn
+	clientIP       string
+	clientUsername string
 }
 
-func serveWs(ws *websocket.Conn) {
-
-	log.Println("hey")
+// WebSocket server to handle chat between clients
+func SockServer(ws *websocket.Conn) {
 	var err error
-	var msg string
+	var clientMessage string
 
+	// cleanup on server side
 	defer ws.Close()
 
 	r := ws.Request()
+
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		log.Println("je close session")
+		log.Println("not connected")
 		return
 	}
 
-	u := session.Values["UserInfo"].(UserData)
+	var u = session.Values["UserInfo"].(UserData)
 
-	sockCli := ClientConn{ws, r.RemoteAddr, u.Id}
+	log.Println("Client connected:", r.RemoteAddr, u.UserName)
+	sockCli := ClientConn{ws, r.RemoteAddr, u.UserName}
+	ActiveClients[sockCli] = 0
+	log.Println("Number of clients connected ...", len(ActiveClients))
 
 	for {
-		if err = Message.Receive(ws, &msg); err != nil {
+		if err = Message.Receive(ws, &clientMessage); err != nil {
+			log.Println("Websocket Disconnected waiting", err.Error())
 			delete(ActiveClients, sockCli)
-			log.Println("je close message")
+			log.Println("Number of clients still connected ...", len(ActiveClients))
 			return
 		}
 
-		msg = session.Values["UserInfo"].(UserData).UserName + " : " + msg
+		clientMessage = sockCli.clientUsername + " Said: " + clientMessage
 		for cs, _ := range ActiveClients {
-			// if cs.userId == u.ChatId || cs.userId == u.Id {
-			if err = Message.Send(cs.websocket, msg); err != nil {
-				log.Println("Could not send message to ", cs.clientIP, err.Error())
+			if err = Message.Send(cs.websocket, clientMessage); err != nil {
+				// we could not send the message to a peer
+				log.Println("Could not send message to ", cs.clientUsername, err.Error())
 			}
-			// }
 		}
 	}
-
 }
 
-func chat(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+// RootHandler renders the template for the root page
+func RootHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	log.Println("Roothandler")
 
 	session, _ := store.Get(r, "session")
-	// log.Println(session)
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		log.Println("not connected")
 		return
 	}
+	var u = session.Values["UserInfo"].(UserData)
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	log.Println(u)
+	chatname := pat.Param(ctx, "chatname")
+	chatname = strings.Replace(chatname, "me", strconv.FormatInt(int64(u.Id), 10), 1)
 
-	u := session.Values["UserInfo"].(UserData)
-	id := pat.Param(ctx, "id")
-	u.ChatId, _ = strconv.Atoi(id)
-	session.Values["UserInfo"] = u
-	session.Save(r, w)
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	renderTemplate(w, "chat", &chatVew{
-		Header: HeadData{
-			Title:      "Chat",
-			Stylesheet: []string{"chat.css"}},
-		Host: "localhost" + LISTEN_PORT})
+	log.Println(chatname)
+	smt, err := database.Prepare("SELECT id FROM chatroom WHERE chatname_one=? OR chatname_two=?")
+	checkErr(err, "RootHandler")
+	var id int64
+	smt.QueryRow(chatname, chatname).Scan(&id)
+	if id == 0 {
+		http.Redirect(w, r, "/me", http.StatusFound)
+		return
+	}
+	log.Println("conneciton to chatroom", id)
+	renderTemplate(w, "chat", listenAddr)
 
 }

@@ -111,8 +111,8 @@ func main() {
 
 	// Chat
 
-	mux.HandleFuncC(pat.Get("/me/chat/:id"), chat)
-	http.Handle("/ws", websocket.Handler(serveWs))
+	mux.HandleFuncC(pat.Get("/chat/:chatname"), RootHandler)
+	mux.Handle(pat.Get("/sock"), websocket.Handler(SockServer))
 
 	// Static Files
 	mux.HandleFunc(pat.Get("/css/*"), staticCssFiles)

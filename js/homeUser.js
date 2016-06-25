@@ -265,7 +265,7 @@
 			success: function(data) {
 				if (data) {
 					$.each(data, function(index, value){
-						$('#matches').append('<li class="matche"><a href="users/' + value.Id + '">' + value.UserName + ' | ' + value.Bod + ' ans</a></li>');
+						$('#matches').append('<li class="matche"><a href="users/' + value.Id + '">' + value.UserName + ' | ' + value.Bod + ' ans</a> -> <a href="chat/me&' + value.Id + '">Contacter</a></li>');
 					})
 				} else {
 					console.log("ne s'interesse a rien pour le moment");

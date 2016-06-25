@@ -56,8 +56,8 @@ func initdatabase() {
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `user` ( " +
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`username` varchar(40) NOT NULL, " +
-		"`firstname` varchar(40) NOT NULL, `" +
-		"lastname` varchar(40) NOT NULL, " +
+		"`firstname` varchar(40) NOT NULL, " +
+		"`lastname` varchar(40) NOT NULL, " +
 		"`birthdate` date DEFAULT NULL, " +
 		"`email` varchar(255) NOT NULL, " +
 		"`password` varbinary(255) NOT NULL, " +
@@ -79,6 +79,12 @@ func initdatabase() {
 		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
 		"`date` datetime DEFAULT NULL, " +
 		"`userid` int(11) NOT NULL, " +
+		"PRIMARY KEY (`id`))")
+	checkErr(err, "database")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `chatroom` ( " +
+		"`id` int(11) NOT NULL AUTO_INCREMENT, " +
+		"`chatname_one` varchar(80) NOT NULL, " +
+		"`chatname_two` varchar(80) NOT NULL, " +
 		"PRIMARY KEY (`id`))")
 	checkErr(err, "database")
 	database = db
