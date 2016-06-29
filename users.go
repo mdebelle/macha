@@ -368,7 +368,7 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/expired", http.StatusNetworkAuthenticationRequired)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
