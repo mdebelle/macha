@@ -38,7 +38,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -92,7 +92,7 @@ func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
@@ -114,7 +114,7 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -141,7 +141,7 @@ func deleteUsersInterests(ctx context.Context, w http.ResponseWriter, r *http.Re
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -166,7 +166,7 @@ func postUsersAge(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -198,7 +198,7 @@ func getUsersAge(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	writeJson(w, ResponseStatus{Status: string(session.Values["UserInfo"].(UserData).BirthDate)})
@@ -210,7 +210,7 @@ func postUsersUsername(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -242,7 +242,7 @@ func getUsersUsername(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).UserName})
@@ -254,7 +254,7 @@ func postUsersFirstName(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -286,7 +286,7 @@ func getUsersFirstName(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).FirstName})
@@ -298,7 +298,7 @@ func postUsersLastName(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -328,7 +328,7 @@ func getUsersLastName(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).LastName})
@@ -340,7 +340,7 @@ func uptdateUsersBio(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 
@@ -368,7 +368,7 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/expired", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 

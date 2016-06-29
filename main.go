@@ -45,7 +45,6 @@ func convertLastCo(d []uint8) string {
 
 func home(w http.ResponseWriter, r *http.Request) {
 
-	log.Println(">>> page d'accueil")
 	renderTemplate(w, "home", &HomeView{
 		Header: HeadData{
 			Title:      "Homepage",

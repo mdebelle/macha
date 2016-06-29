@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"time"
 )
 
 type InscriptionForm struct {
@@ -74,12 +75,20 @@ func postUsers(w http.ResponseWriter, r *http.Request) {
 
 	p, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
 	checkErr(err, "postUsers")
+	tok, err := bcrypt.GenerateFromPassword([]byte(time.Now().String()), bcrypt.DefaultCost)
 
-	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, password=?")
+	smt, err := database.Prepare("INSERT user SET username=?, firstname=?, lastname=?, email=?, token=?")
 	checkErr(err, "postUsers")
 	defer smt.Close()
-	_, err = smt.Exec(iForm.UserName, iForm.FirstName, iForm.LastName, iForm.Email, p)
+	res, err := smt.Exec(iForm.UserName, iForm.FirstName, iForm.LastName, iForm.Email, tok)
 	checkErr(err, "postUsers")
+	id, err := res.LastInsertId()
+
+	smt, err = database.Prepare("INSERT pw SET userid=?, password=?")
+	checkErr(err, "postUsers")
+	_, err = smt.Exec(id, p)
+	checkErr(err, "postUsers")
+
 	session, _ := store.Get(r, "session")
 	session.Values["iForm"] = InscriptionForm{}
 	session.Save(r, w)

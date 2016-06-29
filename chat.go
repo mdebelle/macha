@@ -39,7 +39,6 @@ func SockServer(ws *websocket.Conn) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		log.Println("not connected")
 		return
 	}
 
@@ -77,7 +76,7 @@ func RootHandler(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] != true {
-		log.Println("not connected")
+		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
 	var u = session.Values["UserInfo"].(UserData)

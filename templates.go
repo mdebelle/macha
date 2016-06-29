@@ -49,6 +49,10 @@ type HomeView struct {
 	Header HeadData
 }
 
+type ErrorView struct {
+	Header HeadData
+}
+
 type usersView struct {
 	Header HeadData
 	Users  []UserData
