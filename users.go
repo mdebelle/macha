@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/context"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -40,6 +41,9 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 
 	smt, err := database.Prepare("SELECT id, username, sexe, orientation, bio, popularite FROM user")
@@ -89,8 +93,9 @@ func getUserInterestsList(userid int) []Interest {
 func postUsersInterests(w http.ResponseWriter, r *http.Request) {
 
 	var interest Interest
-
 	session, _ := store.Get(r, "session")
+
+	log.Println(session.Values["connected"])
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
@@ -116,6 +121,9 @@ func getUsersInterests(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 
 	smt, err := database.Prepare("SELECT interest.id, interest.label FROM interest INNER JOIN userinterest ON interest.id=userinterest.interestid WHERE userinterest.userid=?")
@@ -188,6 +196,7 @@ func postUsersAge(w http.ResponseWriter, r *http.Request) {
 	database.QueryRow("SELECT BirthDate FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.BirthDate)
 	checkErr(err, "postUsersAge")
 	session.Values["UserInfo"] = u
+	session.Options.MaxAge = 20
 	session.Save(r, w)
 
 	writeJson(w, ResponseStatus{Status: "ok"})
@@ -232,6 +241,7 @@ func postUsersUsername(w http.ResponseWriter, r *http.Request) {
 	database.QueryRow("SELECT UserName FROM user WHERE id=?", session.Values["UserInfo"].(UserData).Id).Scan(&u.UserName)
 	checkErr(err, "postUsersUsername")
 	session.Values["UserInfo"] = u
+	session.Options.MaxAge = 20
 	session.Save(r, w)
 
 	writeJson(w, ResponseStatus{Status: "ok"})
@@ -244,6 +254,9 @@ func getUsersUsername(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).UserName})
 }
@@ -288,6 +301,9 @@ func getUsersFirstName(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 	writeJson(w, ResponseStatus{Status: session.Values["UserInfo"].(UserData).FirstName})
 }
@@ -342,6 +358,9 @@ func uptdateUsersBio(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
@@ -370,6 +389,9 @@ func getUsersMatches(w http.ResponseWriter, r *http.Request) {
 	if session.Values["connected"] != true {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
+	} else {
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 
 	smt, err := database.Prepare("SELECT id, Username, Birthdate FROM user WHERE id!=?")
@@ -404,6 +426,8 @@ func publicProfile(ctx context.Context, w http.ResponseWriter, r *http.Request) 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] == true {
 		c = true
+		session.Options.MaxAge = 20
+		session.Save(r, w)
 	}
 
 	smt, err := database.Prepare("SELECT user.username, user.birthdate FROM user WHERE id=?")

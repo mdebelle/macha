@@ -18,7 +18,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 	var v homeUserView
 
 	if session.Values["connected"] == true {
-		session.Options.MaxAge = 2
+		session.Options.MaxAge = 10
 		session.Save(r, w)
 		v.Header = HeadData{
 			Title:      "Bonjour " + session.Values["UserInfo"].(UserData).FirstName + " " + session.Values["UserInfo"].(UserData).LastName,
@@ -29,6 +29,7 @@ func connectedUser(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusNetworkAuthenticationRequired)
 		return
 	}
+	log.Println(v.User)
 	renderTemplate(w, "homeUser", &v)
 }
 
@@ -66,7 +67,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session")
 	if session.Values["connected"] == true {
-		session.Options.MaxAge = 5
+		session.Options.MaxAge = 10
 		log.Println("already connected")
 		session.Save(r, w)
 		http.Redirect(w, r, "/me", http.StatusFound)
@@ -91,7 +92,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	checkErr(err, "login")
 	session.Values["connected"] = true
 	session.Values["UserInfo"] = user
-	session.Options.MaxAge = 5
+	session.Options.MaxAge = 10
 	session.Save(r, w)
 	http.Redirect(w, r, "/me", http.StatusFound)
 }

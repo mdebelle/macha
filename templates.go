@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -12,6 +13,11 @@ type HeadData struct {
 	Scripts    []string
 }
 
+func (h HeadData) String() string {
+	return fmt.Sprintf("Title: %s,\nStylsheet: %v\nScripts: %v\n",
+		h.Title, h.Stylesheet, h.Scripts)
+}
+
 type SimpleUser struct {
 	Id       int64
 	Bod      int
@@ -19,12 +25,22 @@ type SimpleUser struct {
 	Bio      string
 }
 
+func (s SimpleUser) String() string {
+	return fmt.Sprintf("Id: %d %s\nAge: %d\nBio: %s\n",
+		s.Id, s.UserName, s.Bod, s.Bio)
+}
+
 type Notifications struct {
 	Id     int64
-	Msg    string
-	Read   bool
 	Date   []uint8
+	Read   bool
 	UserId int64
+	Msg    string
+}
+
+func (n Notifications) String() string {
+	return fmt.Sprintf("Id: %d \tDate: %s \tState: %t\nfor: %d\nContent: %s",
+		n.Id, string(n.Date), n.Read, n.UserId, n.Msg)
 }
 
 type UserData struct {
@@ -43,6 +59,12 @@ type UserData struct {
 	Notifs        []Notifications
 	LastConnexion string
 	ChatId        int
+}
+
+func (u UserData) String() string {
+	return fmt.Sprintf("Id: %d \tUsername: %d\nFirstname: %d \tLastname: %s\nDate de Naissance: %s\nEmail: %s\nBio: %s\n"+
+		"Sexe: %d \tOrientation: %d\n", u.Id, u.UserName, u.FirstName, u.LastName, string(u.BirthDate), u.Email, u.Bio.String,
+		u.Sexe.Int64, u.Orientation.Int64)
 }
 
 type HomeView struct {
